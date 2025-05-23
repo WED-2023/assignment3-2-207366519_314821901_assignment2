@@ -5,7 +5,7 @@ info:
   version: 1.0.1
 servers:
   # local:
-  - url: "http://127.0.0.1:80"
+  - url: "http://127.0.0.1:3000"
     # remote:
     # - url: "http://132.72.65.211"
     description: SwaggerHub API Auto Mocking hey
@@ -17,7 +17,7 @@ tags:
   - name: Recipes
     description: All reciepes general info
 paths:
-  /register:
+  /Register:
     post:
       tags:
         - Auth
@@ -35,7 +35,7 @@ paths:
           description: A new user has been added
         "400":
           description: wrong input parameters
-  /login:
+  /Login:
     post:
       tags:
         - Auth
@@ -60,7 +60,7 @@ paths:
                 example: session=87s97sdhgf279293f8w0e9
         "401":
           description: Authentication failed
-  /logout:
+  /Logout:
     post:
       tags:
         - Auth

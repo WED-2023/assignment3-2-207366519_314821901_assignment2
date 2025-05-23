@@ -106,6 +106,3 @@ process.on("SIGINT", function () {
   process.exit();
 });
 
-
-console.log(process.env.DBpassword);
-console.log(process.env.database);
