@@ -76,125 +76,126 @@ paths:
       responses:
         "200":
           description: user logged out successfully
-  /receipe:
+  /recipes/search:
     get:
       tags:
       - receipe
       summary: get receipes from the server
       description: "By passing in the appropriate options, you can get \navailable receipes in the system\n"
-      operationId: getReceipes
+      operationId: getRecipeByText
       parameters:
-      - name: NumberOfReceipes
+      - name: number
         in: query
         description: Number of desired recipes to return
         required: true
         schema:
           type: integer
+          default: 5
           example: 5
           enum:
           - 5
           - 10
           - 15
-      - name: searchContent
+      - name: query
         in: query
         description: Text to search for matching recipes
         required: true
         schema:
           type: string
           example: pasta
-      - name: cuisine
-        in: query
-        description: Filter recipes by one or more cuisine types (comma-separated)
-        required: false
-        style: form
-        explode: false
-        schema:
-          type: array
-          example:
-          - Italian
-          - Greek
-          items:
-            type: string
-            enum:
-            - African
-            - Asian
-            - American
-            - British
-            - Cajun
-            - Caribbean
-            - Chinese
-            - Eastern European
-            - European
-            - French
-            - German
-            - Greek
-            - Indian
-            - Irish
-            - Italian
-            - Japanese
-            - Jewish
-            - Korean
-            - Latin American
-            - Mediterranean
-            - Mexican
-            - Middle Eastern
-            - Nordic
-            - Southern
-            - Spanish
-            - Thai
-            - Vietnamese
-      - name: diet
-        in: query
-        description: Filter recipes by one or more diet types (comma-separated)
-        required: false
-        style: form
-        explode: false
-        schema:
-          type: array
-          example:
-          - vegetarian
-          - vegan
-          items:
-            type: string
-            enum:
-            - gluten free
-            - ketogenic
-            - vegetarian
-            - lacto-vegetarian
-            - ovo-vegetarian
-            - vegan
-            - pescetarian
-            - paleo
-            - primal
-            - low FODMAP
-            - whole30
-      - name: intolerances
-        in: query
-        description: Filter recipes by one or more intolerances (comma-separated)
-        required: false
-        style: form
-        explode: false
-        schema:
-          type: array
-          example:
-          - gluten
-          - peanut
-          - dairy
-          items:
-            type: string
-            enum:
-            - dairy
-            - egg
-            - gluten
-            - grain
-            - peanut
-            - seafood
-            - sesame
-            - shellfish
-            - soy
-            - sulfite
-            - tree nut
-            - wheat
+      # - name: cuisine
+      #   in: query
+      #   description: Filter recipes by one or more cuisine types (comma-separated)
+      #   required: false
+      #   style: form
+      #   explode: false
+      #   schema:
+      #     type: array
+      #     example:
+      #     - Italian
+      #     - Greek
+      #     items:
+      #       type: string
+      #       enum:
+      #       - African
+      #       - Asian
+      #       - American
+      #       - British
+      #       - Cajun
+      #       - Caribbean
+      #       - Chinese
+      #       - Eastern European
+      #       - European
+      #       - French
+      #       - German
+      #       - Greek
+      #       - Indian
+      #       - Irish
+      #       - Italian
+      #       - Japanese
+      #       - Jewish
+      #       - Korean
+      #       - Latin American
+      #       - Mediterranean
+      #       - Mexican
+      #       - Middle Eastern
+      #       - Nordic
+      #       - Southern
+      #       - Spanish
+      #       - Thai
+      #       - Vietnamese
+      # - name: diet
+      #   in: query
+      #   description: Filter recipes by one or more diet types (comma-separated)
+      #   required: false
+      #   style: form
+      #   explode: false
+      #   schema:
+      #     type: array
+      #     example:
+      #     - vegetarian
+      #     - vegan
+      #     items:
+      #       type: string
+      #       enum:
+      #       - gluten free
+      #       - ketogenic
+      #       - vegetarian
+      #       - lacto-vegetarian
+      #       - ovo-vegetarian
+      #       - vegan
+      #       - pescetarian
+      #       - paleo
+      #       - primal
+      #       - low FODMAP
+      #       - whole30
+      # - name: intolerances
+      #   in: query
+      #   description: Filter recipes by one or more intolerances (comma-separated)
+      #   required: false
+      #   style: form
+      #   explode: false
+      #   schema:
+      #     type: array
+      #     example:
+      #     - gluten
+      #     - peanut
+      #     - dairy
+      #     items:
+      #       type: string
+      #       enum:
+      #       - dairy
+      #       - egg
+      #       - gluten
+      #       - grain
+      #       - peanut
+      #       - seafood
+      #       - sesame
+      #       - shellfish
+      #       - soy
+      #       - sulfite
+      #       - tree nut
+      #       - wheat
       responses:
         "200":
           description: search results matching criteria
@@ -206,6 +207,7 @@ paths:
                   $ref: '#/components/schemas/Receipe'
         "400":
           description: bad input parameter
+  /recipes/addRecipe:
     post:
       tags:
       - receipe
@@ -252,7 +254,7 @@ paths:
           description: internal server error
         "500":
           description: External API error or server error
-  /recipes/{recipeId}:
+  /recipes/searchById/{recipeId}:
     get:
       tags:
       - receipe
@@ -438,12 +440,13 @@ components:
       - summary
       - glutenFree
       - image
-      - ingredients
+      - extendedIngredients
       - instructions
       - title
       - readyInMinutes
       - servings
       - vegan
+      - sourceName
       - vegetarian
       type: object
       properties:
@@ -496,6 +499,10 @@ components:
           type: string
           description: The user who created or added the recipe to the family collection.
           example: user101
+        popularity:
+          type: integer
+          description: The number of likes the recipe has
+          example: 100
     User:
       required:
       - country
