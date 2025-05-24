@@ -1,6 +1,7 @@
 const axios = require("axios");
 const api_domain = "https://api.spoonacular.com/recipes";
-
+const DButils = require("../utils/DButils");
+var idCounter = 0;
 
 
 /**
@@ -63,9 +64,41 @@ async function getRandomRecipes() {
     });
 }
 
+async function getRecipeByText(text, number) {
+    const respone = await axios.get(`${api_domain}/complexSearch`, {
+        params: {
+            query: text,
+            number: number,
+            apiKey: process.env.spooncular_apiKey
+        }
+    });
+    return respone.data.results.map(recipe => {
+        return {
+            id: recipe.id,
+            title: recipe.title,
+            image: recipe.image,
+        }
+    });
+}
+
+async function addRecipe(recipe) {
+    let { id, title, image, readyInMinutes, vegan, vegetarian, glutenFree, extendedIngredients, instructions, summary, sourceName, servings } = recipe;
+    if (!id){
+        id = idCounter++;
+    }
+    // Convert extendedIngredients array to JSON string for storage
+    const ingredientsJson = JSON.stringify(extendedIngredients);
+    
+    await DButils.execQuery(`
+        INSERT INTO receipes (id, title, image, readyInMinutes, vegan, vegetarian, glutenFree, popularity, instructions, summary, sourceName, extendedIngredients, servings) 
+        VALUES (${id}, '${title}', '${image}', ${readyInMinutes}, ${vegan}, ${vegetarian}, ${glutenFree}, 0, '${instructions}', '${summary}', '${sourceName}', '${ingredientsJson}', ${servings})
+    `);
+}
 
 
 exports.getRecipeDetails = getRecipeDetails;
 exports.getRandomRecipes = getRandomRecipes;
+exports.getRecipeByText = getRecipeByText;
+exports.addRecipe = addRecipe;
 
 
