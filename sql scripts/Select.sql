@@ -1,1 +1,1 @@
-SELECT * FROM mydb.users;
+SELECT * FROM `webprograming3.2`.users;
