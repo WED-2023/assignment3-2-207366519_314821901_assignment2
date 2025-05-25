@@ -97,8 +97,12 @@ async function addRecipe(recipe) {
 
 
 
+function formatToMySQLDatetime(date) {
+    return date.toISOString().slice(0, 19).replace('T', ' ');
+}
+
 async function updateLastViewedRecipe(userId, recipeId, internalRecipe) {
-    const now = new Date().toISOString();
+    const now = formatToMySQLDatetime(new Date());
 
     // Delete the current entry if it exists to avoid duplication
     await DButils.execQuery(`
@@ -116,13 +120,16 @@ async function updateLastViewedRecipe(userId, recipeId, internalRecipe) {
     await DButils.execQuery(`
         DELETE FROM lastViewRecipes
         WHERE userId='${userId}' AND recipeId NOT IN (
-            SELECT recipeId FROM lastViewRecipes
-            WHERE userId='${userId}'
-            ORDER BY lastView DESC
-            LIMIT 3
+            SELECT recipeId FROM (
+                SELECT recipeId FROM lastViewRecipes
+                WHERE userId='${userId}'
+                ORDER BY lastView DESC
+                LIMIT 3
+            ) AS temp
         );
     `);
 }
+
 
 
 

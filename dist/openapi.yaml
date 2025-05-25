@@ -433,7 +433,7 @@ paths:
           description: Recipe not found
       security:
         - cookieAuth: []
-  /receipe/addToViewRecipe:
+  /recipes/addToViewRecipe:
     post:
       tags:
         - receipe
@@ -449,8 +449,8 @@ paths:
               type: object
               properties:
                 userId:
-                  type: string
-                  example: "user123"
+                  type: integer
+                  example: 123
                 recipeId:
                   type: integer
                   example: 101
