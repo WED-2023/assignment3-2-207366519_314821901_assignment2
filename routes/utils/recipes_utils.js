@@ -39,6 +39,14 @@ async function getRecipeDetails(recipe_id) {
     }
 }
 
+async function getRecipesByArray(recipes_id_array) {
+  return await Promise.all(recipes_id_array.map(id => getRecipeDetails(id)));
+}
+    
+
+
+
+
 async function getRandomRecipes() {
     const respone = await axios.get(`${api_domain}/random`, {
         params: {
@@ -135,7 +143,7 @@ async function updateLastViewedRecipe(userId, recipeId, internalRecipe) {
 
 
 
-
+exports.getRecipesByArray = getRecipesByArray;
 exports.updateLastViewedRecipe = updateLastViewedRecipe;
 exports.getRecipeDetails = getRecipeDetails;
 exports.getRandomRecipes = getRandomRecipes;

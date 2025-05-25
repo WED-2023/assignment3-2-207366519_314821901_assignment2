@@ -5,7 +5,6 @@ const recipes_utils = require("./utils/recipes_utils");
 router.get("/", (req, res) => res.send("im here"));
 
 router.get("/random", async (req, res, next) => {
-  console.log("enterd to random recipes first");
   try {
     const recipes = await recipes_utils.getRandomRecipes();
     res.send(recipes);

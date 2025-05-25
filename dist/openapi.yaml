@@ -76,6 +76,7 @@ paths:
       responses:
         "200":
           description: user logged out successfully
+
   /recipes/search:
     get:
       tags:
@@ -290,149 +291,6 @@ paths:
           description: Recipe not found
         "500":
           description: External API error or server error
-  /fav_receipes:
-    get:
-      tags:
-      - user
-      - receipe
-      summary: Get a user's favorite recipes.
-      description: Retrieve the list of recipes that the user has marked as favorites.
-      operationId: getFavReceipes
-      responses:
-        "200":
-          description: Successfully retrieved favorite recipes.
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Receipe'
-        "401":
-          description: "Unauthorized, invalid session or missing session"
-        "404":
-          description: No favorite recipes found for the user
-      security:
-        - cookieAuth: []
-    post:
-      tags:
-      - user
-      - receipe
-      summary: Add a recipe to user's favorites.
-      description: Add a recipe to the user's list of favorite recipes.
-      operationId: addFavReceipe
-      requestBody:
-        description: Recipe to add to favorites
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/fav_receipes_body'
-        required: true
-      responses:
-        "201":
-          description: Recipe successfully added to favorites.
-        "400":
-          description: Invalid input data
-        "401":
-          description: "Unauthorized, invalid session or missing session"
-        "404":
-          description: Recipe not found
-        "409":
-          description: Duplicate receipe on favorite list
-      security:
-        - cookieAuth: []
-  /family_receipes:
-    get:
-      tags:
-      - receipe
-      - user
-      summary: Get family recipes.
-      description: Retrieve the list of family recipes shared within the community. Requires login (session).
-      operationId: getFamilyReceipes
-      responses:
-        "200":
-          description: List of family recipes retrieved successfully
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Receipe'
-        "401":
-          description: Unauthorized (missing or invalid session)
-      security:
-        - cookieAuth: []
-    post:
-      tags:
-      - receipe
-      summary: Add a new recipe to the family recipes.
-      description: Add a new family recipe. Requires login (session).
-      operationId: addFamilyReceipe
-      requestBody:
-        description: Family recipe to add
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Receipe'
-        required: true
-      responses:
-        "201":
-          description: Family recipe created successfully
-        "400":
-          description: "Invalid input, object invalid"
-        "401":
-          description: Unauthorized (missing or invalid session)
-      security:
-        - cookieAuth: []
-  /receipe/{id}/like:
-    post:
-      tags:
-      - receipe
-      - user
-      summary: Like a recipe.
-      description: Add a like to a recipe by a user.
-      operationId: likeReceipe
-      parameters:
-      - name: id
-        in: path
-        description: ID of the recipe to like
-        required: true
-        schema:
-          type: integer
-      responses:
-        "200":
-          description: Recipe liked successfully
-        "400":
-          description: Invalid recipe ID
-        "401":
-          description: Unauthorized (missing or invalid session)
-        "404":
-          description: Recipe not found
-      security:
-        - cookieAuth: []
-    delete:
-      tags:
-      - receipe
-      summary: Unlike a recipe.
-      description: Remove a like from a recipe by a user.
-      operationId: unlikeReceipe
-      parameters:
-      - name: id
-        in: path
-        description: ID of the recipe to unlike
-        required: true
-        schema:
-          type: integer
-      responses:
-        "200":
-          description: Recipe unliked successfully
-        "400":
-          description: Invalid recipe ID
-        "401":
-          description: Unauthorized (missing or invalid session)
-        "404":
-          description: Recipe not found
-      security:
-        - cookieAuth: []
   /recipes/addToViewRecipe:
     post:
       tags:
@@ -468,6 +326,144 @@ paths:
           description: Invalid input, object invalid
         "500":
           description: Server error while recording recipe view
+  /favorites:
+    post:
+      tags:
+        - user
+      summary: Add a recipe to favorites
+      description: Save a recipe to the logged-in user's list of favorite recipes.
+      operationId: markAsFavorite
+      requestBody:
+        description: Recipe to add to favorites
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                recipeId:
+                  type: integer
+                  example: 12345
+                internalRecipe:
+                  type: boolean
+                  example: false
+      responses:
+        "200":
+          description: The recipe was successfully saved as favorite
+        "400":
+          description: Invalid input
+        "401":
+          description: Unauthorized
+
+
+
+
+
+
+
+
+
+
+
+
+
+# #need to be changed
+#   /family_receipes:
+#     get:
+#       tags:
+#       - receipe
+#       - user
+#       summary: Get family recipes.
+#       description: Retrieve the list of family recipes shared within the community. Requires login (session).
+#       operationId: getFamilyReceipes
+#       responses:
+#         "200":
+#           description: List of family recipes retrieved successfully
+#           content:
+#             application/json:
+#               schema:
+#                 type: array
+#                 items:
+#                   $ref: '#/components/schemas/Receipe'
+#         "401":
+#           description: Unauthorized (missing or invalid session)
+#       security:
+#         - cookieAuth: []
+#     post:
+#       tags:
+#       - receipe
+#       summary: Add a new recipe to the family recipes.
+#       description: Add a new family recipe. Requires login (session).
+#       operationId: addFamilyReceipe
+#       requestBody:
+#         description: Family recipe to add
+#         content:
+#           application/json:
+#             schema:
+#               $ref: '#/components/schemas/Receipe'
+#         required: true
+#       responses:
+#         "201":
+#           description: Family recipe created successfully
+#         "400":
+#           description: "Invalid input, object invalid"
+#         "401":
+#           description: Unauthorized (missing or invalid session)
+#       security:
+#         - cookieAuth: []
+# ##need to be changed     
+#   /receipe/{id}/like:
+#     post:
+#       tags:
+#       - receipe
+#       - user
+#       summary: Like a recipe.
+#       description: Add a like to a recipe by a user.
+#       operationId: likeReceipe
+#       parameters:
+#       - name: id
+#         in: path
+#         description: ID of the recipe to like
+#         required: true
+#         schema:
+#           type: integer
+#       responses:
+#         "200":
+#           description: Recipe liked successfully
+#         "400":
+#           description: Invalid recipe ID
+#         "401":
+#           description: Unauthorized (missing or invalid session)
+#         "404":
+#           description: Recipe not found
+#       security:
+#         - cookieAuth: []
+#     delete:
+#       tags:
+#       - receipe
+#       summary: Unlike a recipe.
+#       description: Remove a like from a recipe by a user.
+#       operationId: unlikeReceipe
+#       parameters:
+#       - name: id
+#         in: path
+#         description: ID of the recipe to unlike
+#         required: true
+#         schema:
+#           type: integer
+#       responses:
+#         "200":
+#           description: Recipe unliked successfully
+#         "400":
+#           description: Invalid recipe ID
+#         "401":
+#           description: Unauthorized (missing or invalid session)
+#         "404":
+#           description: Recipe not found
+#       security:
+#         - cookieAuth: []
+
+
 components:
   schemas:
     Receipe:
@@ -539,28 +535,28 @@ components:
           description: The number of likes the recipe has
           example: 100
     User:
-      required:
-      - country
-      - email
-      - firstname
-      - lastname
-      - password
-      - username
       type: object
+      required:
+        - country
+        - email
+        - firstname
+        - lastname
+        - password
+        - username
       properties:
-        id:
+        user_id:
           type: integer
-          format: string
+          readOnly: true
           example: 101
         username:
           type: string
           example: Acef_
         firstname:
           type: string
-          example: asaf
+          example: Asaf
         lastname:
           type: string
-          example: baroch
+          example: Baroch
         email:
           type: string
           format: email
@@ -571,8 +567,8 @@ components:
           example: "123"
         country:
           type: string
-          format: country
           example: Israel
+
     fav_receipes_body:
       required:
       - recipeId
