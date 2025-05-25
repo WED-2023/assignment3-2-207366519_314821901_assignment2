@@ -1,7 +1,8 @@
 USE `webprograming3.2`;
 
 CREATE TABLE IF NOT EXISTS users (
-  username VARCHAR(50) PRIMARY KEY,
+  user_id INT AUTO_INCREMENT PRIMARY KEY,
+  username VARCHAR(50) UNIQUE NOT NULL,
   firstname VARCHAR(50) NOT NULL,
   lastname VARCHAR(50) NOT NULL,
   country VARCHAR(50) NOT NULL,
@@ -9,6 +10,7 @@ CREATE TABLE IF NOT EXISTS users (
   email VARCHAR(100) NOT NULL UNIQUE,
   profilePic VARCHAR(255)
 );
+
 
 create table if not exists receipes (
     id int primary key,
@@ -29,6 +31,13 @@ create table if not exists lastViewRecipes (
     userId varchar(50) not null,
     recipeId int not null,
     lastView TIMESTAMP DEFAULT NOW(),
-    internalRecipe boolean not null
+    internalRecipe boolean not null,
+    PRIMARY KEY (userId, recipeId)
 );
 
+create table if not exists favoriteRecipes (
+    userId varchar(50) not null,
+    recipeId int not null,
+    internalRecipe boolean not null,
+    PRIMARY KEY (userId, recipeId)
+);

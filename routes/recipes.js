@@ -5,7 +5,6 @@ const recipes_utils = require("./utils/recipes_utils");
 router.get("/", (req, res) => res.send("im here"));
 
 router.get("/random", async (req, res, next) => {
-  console.log("enterd to random recipes first");
   try {
     const recipes = await recipes_utils.getRandomRecipes();
     res.send(recipes);
@@ -49,7 +48,6 @@ router.post("/addRecipe", async (req, res, next) => {
 
 router.post("/addToViewRecipe", async (req, res, next) => {
   try {
-    console.log(req.body,"asafasafasafasafasfasfasfasfasf");
     const { userId, recipeId, internalRecipe } = req.body;
     await recipes_utils.updateLastViewedRecipe(userId, recipeId, internalRecipe);
     res.status(200).send("Recipe view recorded.");

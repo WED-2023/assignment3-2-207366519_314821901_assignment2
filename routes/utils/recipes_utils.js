@@ -39,6 +39,14 @@ async function getRecipeDetails(recipe_id) {
     }
 }
 
+async function getRecipesByArray(recipes_id_array) {
+  return await Promise.all(recipes_id_array.map(id => getRecipeDetails(id)));
+}
+    
+
+
+
+
 async function getRandomRecipes() {
     const respone = await axios.get(`${api_domain}/random`, {
         params: {
@@ -97,8 +105,12 @@ async function addRecipe(recipe) {
 
 
 
+function formatToMySQLDatetime(date) {
+    return date.toISOString().slice(0, 19).replace('T', ' ');
+}
+
 async function updateLastViewedRecipe(userId, recipeId, internalRecipe) {
-    const now = new Date().toISOString();
+    const now = formatToMySQLDatetime(new Date());
 
     // Delete the current entry if it exists to avoid duplication
     await DButils.execQuery(`
@@ -116,10 +128,12 @@ async function updateLastViewedRecipe(userId, recipeId, internalRecipe) {
     await DButils.execQuery(`
         DELETE FROM lastViewRecipes
         WHERE userId='${userId}' AND recipeId NOT IN (
-            SELECT recipeId FROM lastViewRecipes
-            WHERE userId='${userId}'
-            ORDER BY lastView DESC
-            LIMIT 3
+            SELECT recipeId FROM (
+                SELECT recipeId FROM lastViewRecipes
+                WHERE userId='${userId}'
+                ORDER BY lastView DESC
+                LIMIT 3
+            ) AS temp
         );
     `);
 }
@@ -129,6 +143,7 @@ async function updateLastViewedRecipe(userId, recipeId, internalRecipe) {
 
 
 
+exports.getRecipesByArray = getRecipesByArray;
 exports.updateLastViewedRecipe = updateLastViewedRecipe;
 exports.getRecipeDetails = getRecipeDetails;
 exports.getRandomRecipes = getRandomRecipes;
