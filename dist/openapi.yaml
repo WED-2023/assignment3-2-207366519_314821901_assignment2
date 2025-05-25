@@ -433,6 +433,41 @@ paths:
           description: Recipe not found
       security:
         - cookieAuth: []
+  /receipe/addToViewRecipe:
+    post:
+      tags:
+        - receipe
+      summary: Record a user's recipe view
+      description: Records the viewing of a recipe by a user and maintains only their 3 most recent viewed recipes.
+      operationId: viewRecipe
+      requestBody:
+        description: Information about the viewed recipe
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userId:
+                  type: string
+                  example: "user123"
+                recipeId:
+                  type: integer
+                  example: 101
+                internalRecipe:
+                  type: boolean
+                  example: true
+              required:
+                - userId
+                - recipeId
+                - internalRecipe
+      responses:
+        "200":
+          description: Recipe view recorded.
+        "400":
+          description: Invalid input, object invalid
+        "500":
+          description: Server error while recording recipe view
 components:
   schemas:
     Receipe:

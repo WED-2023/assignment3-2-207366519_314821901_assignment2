@@ -25,3 +25,10 @@ create table if not exists receipes (
     extendedIngredients text not null,
     servings int not null
 );
+create table if not exists lastViewRecipes (
+    userId varchar(50) not null,
+    recipeId int not null,
+    lastView TIMESTAMP DEFAULT NOW(),
+    internalRecipe boolean not null
+);
+

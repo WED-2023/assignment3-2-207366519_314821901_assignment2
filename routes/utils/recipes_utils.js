@@ -96,6 +96,40 @@ async function addRecipe(recipe) {
 }
 
 
+
+async function updateLastViewedRecipe(userId, recipeId, internalRecipe) {
+    const now = new Date().toISOString();
+
+    // Delete the current entry if it exists to avoid duplication
+    await DButils.execQuery(`
+        DELETE FROM lastViewRecipes 
+        WHERE userId='${userId}' AND recipeId=${recipeId};
+    `);
+
+    // Insert the new view
+    await DButils.execQuery(`
+        INSERT INTO lastViewRecipes (userId, recipeId, lastView, internalRecipe)
+        VALUES ('${userId}', ${recipeId}, '${now}', ${internalRecipe});
+    `);
+
+    // Delete oldest if more than 3 views exist
+    await DButils.execQuery(`
+        DELETE FROM lastViewRecipes
+        WHERE userId='${userId}' AND recipeId NOT IN (
+            SELECT recipeId FROM lastViewRecipes
+            WHERE userId='${userId}'
+            ORDER BY lastView DESC
+            LIMIT 3
+        );
+    `);
+}
+
+
+
+
+
+
+exports.updateLastViewedRecipe = updateLastViewedRecipe;
 exports.getRecipeDetails = getRecipeDetails;
 exports.getRandomRecipes = getRandomRecipes;
 exports.getRecipeByText = getRecipeByText;

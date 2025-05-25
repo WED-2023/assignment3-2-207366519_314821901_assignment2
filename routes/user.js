@@ -35,6 +35,7 @@ router.post('/favorites', async (req,res,next) => {
   }
 })
 
+
 /**
  * This path returns the favorites recipes that were saved by the logged-in user
  */
