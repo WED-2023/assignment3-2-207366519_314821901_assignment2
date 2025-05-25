@@ -47,4 +47,22 @@ router.post("/addRecipe", async (req, res, next) => {
   }
 });
 
+router.post("/addToViewRecipe", async (req, res, next) => {
+  try {
+    console.log(req.body,"asafasafasafasafasfasfasfasfasf");
+    const { userId, recipeId, internalRecipe } = req.body;
+    await recipes_utils.updateLastViewedRecipe(userId, recipeId, internalRecipe);
+    res.status(200).send("Recipe view recorded.");
+  } catch (error) {
+    next(error);
+  }
+});
+
+
+
+
+
+
+
+
 module.exports = router;
