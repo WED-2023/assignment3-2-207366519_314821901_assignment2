@@ -208,7 +208,7 @@ paths:
                   $ref: '#/components/schemas/Receipe'
         "400":
           description: bad input parameter
-  /recipes/addRecipe:
+  /recipes/RecipeDB:
     post:
       tags:
       - receipe
@@ -226,6 +226,32 @@ paths:
           description: receipe created successfully
         "400":
           description: "invalid input, object invalid"
+    get:
+      tags:
+        - receipe
+      summary: Get an internal receipe by ID
+      description: Retrieve a specific internal r ecipe stored in the website's database.
+      operationId: getInternalReceipe
+      parameters:
+        - name: recipeId
+          in: query
+          required: true
+          schema:
+            type: integer
+          description: The ID of the internal recipe to retrieve
+      responses:
+        "200":
+          description: Recipe retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Receipe'
+        "400":
+          description: Invalid recipe ID
+        "404":
+          description: Recipe not found
+
+
   /recipes/random:
     get:
       tags:
@@ -326,7 +352,7 @@ paths:
           description: Invalid input, object invalid
         "500":
           description: Server error while recording recipe view
-  /favorites:
+  /users/favorites:
     post:
       tags:
         - user
@@ -354,6 +380,107 @@ paths:
           description: Invalid input
         "401":
           description: Unauthorized
+    get:
+      tags:
+        - user
+      summary: Get user's favorite recipes
+      description: Retrieve the list of favorite recipes for the logged-in user.
+      operationId: getFavoriteRecipes
+      responses:
+        "200":
+          description: List of favorite recipes retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Receipe'
+        "401":
+          description: Unauthorized
+  /users/remove:
+    delete:
+      tags:
+        - user
+      summary: Remove a recipe from favorites
+      description: Remove a recipe from the logged-in user's list of favorite recipes.
+      operationId: removeFavoriteRecipe
+      requestBody:
+        description: Recipe to remove from favorites
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                recipeId:
+                  type: integer
+                  example: 12345
+              required:
+                - recipeId
+      responses:
+        "200":
+          description: Recipe removed from favorites
+        "400":
+          description: Missing recipeId
+        "401":
+          description: Unauthorized
+  /users/history:
+    post:
+      tags:
+        - user
+      summary: Add a recipe to user's view history
+      description: Save a recipe to the logged-in user's view history.
+      operationId: addToHistoryRecipes
+      requestBody:
+        description: Recipe to add to history
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                recipeId:
+                  type: integer
+                  example: 456
+                internalRecipe:
+                  type: boolean
+                  example: true
+      responses:
+        "200":
+          description: The recipe was successfully added to history
+        "400":
+          description: Invalid input
+        "401":
+          description: Unauthorized
+        "500":
+          description: Server error or database failure
+    get:
+      tags:
+        - user
+      summary: Get user's view history
+      description: Retrieve the list of recipes viewed by the logged-in user.
+      operationId: getHistoryRecipes
+      responses:
+        "200":
+          description: List of viewed recipes retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    recipeId:
+                      type: integer
+                      example: 456
+                    internalRecipe:
+                      type: boolean
+                      example: true
+        "401":
+          description: Unauthorized
+
+
+  
 
 
 
@@ -584,10 +711,9 @@ components:
       - password
       type: object
       properties:
-        email:
+        username:
           type: string
-          format: email
-          example: asaf@example.com
+          example: Acef_
         password:
           type: string
           format: password

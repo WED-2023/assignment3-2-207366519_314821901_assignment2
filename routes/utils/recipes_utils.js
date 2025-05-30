@@ -22,7 +22,6 @@ async function getRecipeInformation(recipe_id) {
 async function getRecipeDetails(recipe_id) {
     let recipe_info = await getRecipeInformation(recipe_id);
     let { id, title, readyInMinutes, image, aggregateLikes, vegan, vegetarian, glutenFree, extendedIngredients, instructions, summary, sourceName } = recipe_info.data;
-
     return {
         id: id,
         title: title,
@@ -39,8 +38,16 @@ async function getRecipeDetails(recipe_id) {
     }
 }
 
-async function getRecipesByArray(recipes_id_array) {
-  return await Promise.all(recipes_id_array.map(id => getRecipeDetails(id)));
+async function getRecipesByArray(recipesArray) {
+  return await Promise.all(
+    recipesArray.map(({ recipeId, internalRecipe }) => {
+      if (internalRecipe) {
+        return getRecipeFromDB(recipeId);
+      } else {
+        return getRecipeDetails(recipeId);
+      }
+    })
+  );
 }
     
 
@@ -89,7 +96,7 @@ async function getRecipeByText(text, number) {
     });
 }
 
-async function addRecipe(recipe) {
+async function addRecipeToDB(recipe) {
     let { id, title, image, readyInMinutes, vegan, vegetarian, glutenFree, extendedIngredients, instructions, summary, sourceName, servings } = recipe;
     if (!id){
         id = idCounter++;
@@ -102,6 +109,36 @@ async function addRecipe(recipe) {
         VALUES (${id}, '${title}', '${image}', ${readyInMinutes}, ${vegan}, ${vegetarian}, ${glutenFree}, 0, '${instructions}', '${summary}', '${sourceName}', '${ingredientsJson}', ${servings})
     `);
 }
+
+
+async function getRecipeFromDB(recipeId) {
+  const results = await DButils.execQuery(`
+    SELECT id, title, image, readyInMinutes, vegan, vegetarian, glutenFree, popularity, instructions, summary, sourceName, extendedIngredients, servings
+    FROM receipes
+    WHERE id = ${recipeId}
+    LIMIT 1;
+  `);
+
+  if (results.length === 0) {
+    throw new Error("Recipe not found in DB");
+  }
+
+  const recipe = results[0];
+
+  // extendedIngredients is stored as JSON string, parse it
+  recipe.extendedIngredients = JSON.parse(recipe.extendedIngredients);
+
+  // Optionally, convert tinyint(1) or int fields to booleans if needed:
+  recipe.vegan = Boolean(recipe.vegan);
+  recipe.vegetarian = Boolean(recipe.vegetarian);
+  recipe.glutenFree = Boolean(recipe.glutenFree);
+
+  return recipe;
+}
+
+
+
+
 
 
 
@@ -142,12 +179,15 @@ async function updateLastViewedRecipe(userId, recipeId, internalRecipe) {
 
 
 
+module.exports = {
+  getRecipeFromDB,
+  getRecipesByArray,
+  updateLastViewedRecipe,
+  getRecipeDetails,
+  getRandomRecipes,
+  getRecipeByText,
+  addRecipeToDB,
+};
 
-exports.getRecipesByArray = getRecipesByArray;
-exports.updateLastViewedRecipe = updateLastViewedRecipe;
-exports.getRecipeDetails = getRecipeDetails;
-exports.getRandomRecipes = getRandomRecipes;
-exports.getRecipeByText = getRecipeByText;
-exports.addRecipe = addRecipe;
 
 

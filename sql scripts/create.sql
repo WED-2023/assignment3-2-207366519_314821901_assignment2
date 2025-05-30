@@ -32,12 +32,21 @@ create table if not exists lastViewRecipes (
     recipeId int not null,
     lastView TIMESTAMP DEFAULT NOW(),
     internalRecipe boolean not null,
-    PRIMARY KEY (userId, recipeId)
+    PRIMARY KEY (userId, recipeId,internalRecipe)
 );
 
 create table if not exists favoriteRecipes (
     userId varchar(50) not null,
     recipeId int not null,
     internalRecipe boolean not null,
-    PRIMARY KEY (userId, recipeId)
+    PRIMARY KEY (userId, recipeId,internalRecipe)
+);
+
+
+
+create table if not exists historyviewrecipes (
+    userId varchar(50) not null,
+    recipeId int not null,
+    internalRecipe boolean not null,
+    PRIMARY KEY (userId, recipeId,internalRecipe)
 );
