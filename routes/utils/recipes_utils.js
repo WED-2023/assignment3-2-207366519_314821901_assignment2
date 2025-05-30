@@ -132,8 +132,18 @@ async function updateLastViewedRecipe(userId, recipeId, internalRecipe) {
 
 
 
+async function getRecipeLikes(recipeId) {
+    const likes = await DButils.execQuery(`
+        SELECT COUNT(*) AS likesCount
+        FROM likes
+        WHERE recipe_id=${recipeId}
+    `);
+    return likes[0].likesCount;
+}
+
 
 module.exports = {
+  getRecipeLikes,
   getRecipesByArray,
   updateLastViewedRecipe,
   getRecipeDetails,

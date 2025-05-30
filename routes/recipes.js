@@ -53,10 +53,15 @@ router.post("/addToViewRecipe", async (req, res, next) => {
 });
 
 
-
-
-
-
-
+router.get("/recipeLikes", async (req, res, next) => {
+  try {
+    const recipeId = req.query.recipeId;
+    const likes = await recipes_utils.getRecipeLikes(recipeId);
+    res.status(200).send(likes);
+  } catch (error) {
+    next(error);
+  }
+}
+)
 
 module.exports = router;
