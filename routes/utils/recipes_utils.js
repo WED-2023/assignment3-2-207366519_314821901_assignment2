@@ -79,67 +79,21 @@ async function getRandomRecipes() {
     });
 }
 
-async function getRecipeByText(text, number) {
+async function getRecipeByText(text, number, cuisine=null, diet=null, intolerance=null) {
     const respone = await axios.get(`${api_domain}/complexSearch`, {
         params: {
             query: text,
             number: number,
-            apiKey: process.env.spooncular_apiKey
+            apiKey: process.env.spooncular_apiKey,
+            ...(cuisine && { cuisine }),
+            ...(diet && { diet }),
+            ...(intolerance && { intolerances: intolerance })
         }
     });
-    return respone.data.results.map(recipe => {
-        return {
-            id: recipe.id,
-            title: recipe.title,
-            image: recipe.image,
-        }
-    });
+    const recipes_id = respone.data.results.map(recipe => {return {recipeId:recipe.id,internalRecipe:false}});
+    const recipes_details = await getRecipesByArray(recipes_id);
+    return recipes_details;
 }
-
-async function addRecipeToDB(recipe) {
-    let { id, title, image, readyInMinutes, vegan, vegetarian, glutenFree, extendedIngredients, instructions, summary, sourceName, servings } = recipe;
-    if (!id){
-        id = idCounter++;
-    }
-    // Convert extendedIngredients array to JSON string for storage
-    const ingredientsJson = JSON.stringify(extendedIngredients);
-    
-    await DButils.execQuery(`
-        INSERT INTO receipes (id, title, image, readyInMinutes, vegan, vegetarian, glutenFree, popularity, instructions, summary, sourceName, extendedIngredients, servings) 
-        VALUES (${id}, '${title}', '${image}', ${readyInMinutes}, ${vegan}, ${vegetarian}, ${glutenFree}, 0, '${instructions}', '${summary}', '${sourceName}', '${ingredientsJson}', ${servings})
-    `);
-}
-
-
-async function getRecipeFromDB(recipeId) {
-  const results = await DButils.execQuery(`
-    SELECT id, title, image, readyInMinutes, vegan, vegetarian, glutenFree, popularity, instructions, summary, sourceName, extendedIngredients, servings
-    FROM receipes
-    WHERE id = ${recipeId}
-    LIMIT 1;
-  `);
-
-  if (results.length === 0) {
-    throw new Error("Recipe not found in DB");
-  }
-
-  const recipe = results[0];
-
-  // extendedIngredients is stored as JSON string, parse it
-  recipe.extendedIngredients = JSON.parse(recipe.extendedIngredients);
-
-  // Optionally, convert tinyint(1) or int fields to booleans if needed:
-  recipe.vegan = Boolean(recipe.vegan);
-  recipe.vegetarian = Boolean(recipe.vegetarian);
-  recipe.glutenFree = Boolean(recipe.glutenFree);
-
-  return recipe;
-}
-
-
-
-
-
 
 
 function formatToMySQLDatetime(date) {
@@ -180,13 +134,11 @@ async function updateLastViewedRecipe(userId, recipeId, internalRecipe) {
 
 
 module.exports = {
-  getRecipeFromDB,
   getRecipesByArray,
   updateLastViewedRecipe,
   getRecipeDetails,
   getRandomRecipes,
   getRecipeByText,
-  addRecipeToDB,
 };
 
 
