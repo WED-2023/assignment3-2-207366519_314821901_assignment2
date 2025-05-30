@@ -60,3 +60,11 @@ CREATE TABLE IF NOT EXISTS family_recipes(
   FOREIGN KEY (user_id) REFERENCES users(user_id),
   FOREIGN KEY (recipe_id) REFERENCES receipes(id)
 )
+
+CREATE TABLE IF NOT EXISTS likes(
+  user_id INT NOT NULL,
+  recipe_id INT NOT NULL,
+  PRIMARY KEY (user_id, recipe_id)
+);
+
+

@@ -137,4 +137,41 @@ router.get("/history", async (req, res, next) => {
     }
   });
 
+
+router.post("/like", async (req, res, next) => {
+  try {
+    const user_id = req.session.user_id;
+    const recipeId = req.body.recipeId;
+    await user_utils.addLike(user_id, recipeId);
+    res.status(200).send("like added successfully");
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.delete("/like", async (req, res, next) => {
+  try {
+    const user_id = req.session.user_id;
+    const recipeId = req.body.recipeId;
+    await user_utils.deleteLike(user_id, recipeId);
+    res.status(200).send("like deleted successfully");
+  } catch (error) {
+    next(error);
+  }
+});
+
+
+
+router.get("/userLikedRecipe", async (req, res, next) => {
+  try {
+    const user_id = req.session.user_id;
+    const recipeId = req.query.recipeId;
+    const isLiked = await user_utils.isUserLikedRecipe(user_id, recipeId);
+    res.status(200).send(isLiked);
+  } catch (error) {
+    next(error);
+  }
+})
+
+
 module.exports = router;

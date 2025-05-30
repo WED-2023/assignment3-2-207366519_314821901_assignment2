@@ -53,7 +53,7 @@ async function getRecipeFromDB(recipeId) {
     WHERE id = ${recipeId}
     LIMIT 1;
   `);
-
+  
   if (results.length === 0) {
     throw new Error("Recipe not found in DB");
   }
@@ -67,7 +67,6 @@ async function getRecipeFromDB(recipeId) {
   recipe.vegan = Boolean(recipe.vegan);
   recipe.vegetarian = Boolean(recipe.vegetarian);
   recipe.glutenFree = Boolean(recipe.glutenFree);
-
   return recipe;
 }
 async function addRecipeToDB(recipe) {
@@ -84,14 +83,19 @@ async function addRecipeToDB(recipe) {
   `);
 }
 async function getFamilyRecipes(user_id){
+  console.log("Fetching family recipes for user:", user_id);
   const query = `
     SELECT recipe_id, familyowner, whenmade
     FROM family_recipes
     WHERE user_id = '${user_id}'
   `;
   const family_recipes = await DButils.execQuery(query);
+  console.log("Family recipes found:", family_recipes);
   try{
-    const recipes = family_recipes.map(recipe => {return getRecipeFromDB(recipe.recipe_id)})
+      const recipePromises = family_recipes.map(recipe =>
+      getRecipeFromDB(recipe.recipe_id)
+    );
+    const recipes = await Promise.all(recipePromises); // <-- Await all promises here
     return recipes;
   }catch(error){
     // it means that the recipe is not in the database
@@ -100,6 +104,37 @@ async function getFamilyRecipes(user_id){
   }
 }
 
+
+
+
+async function addLike(user_id, recipeId) {
+    return await DButils.execQuery(`
+        INSERT INTO likes (user_id, recipe_id)
+        VALUES ('${user_id}', ${recipeId})
+    `);
+}
+
+async function deleteLike(user_id, recipeId) {
+    return await DButils.execQuery(`
+        DELETE FROM likes
+        WHERE user_id='${user_id}' AND recipe_id=${recipeId}
+    `);
+}
+
+
+
+async function isUserLikedRecipe(user_id, recipeId) {
+    const likes = await DButils.execQuery(`
+        SELECT COUNT(*) AS likesCount
+        FROM likes
+        WHERE user_id='${user_id}' AND recipe_id=${recipeId}
+    `);
+    return likes[0].likesCount > 0;
+}
+
+exports.addLike = addLike;
+exports.deleteLike = deleteLike;
+exports.isUserLikedRecipe = isUserLikedRecipe;
 exports.historyEntryExists = historyEntryExists;
 exports.getHistoryRecipes = getHistoryRecipes;
 exports.addToHistoryRecipes = addToHistoryRecipes;

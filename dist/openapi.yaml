@@ -208,7 +208,7 @@ paths:
                   $ref: '#/components/schemas/Receipe'
         "400":
           description: bad input parameter
-  /recipes/RecipeDB:
+  /users/RecipeDB:
     post:
       tags:
       - user
@@ -251,6 +251,116 @@ paths:
         "404":
           description: Recipe not found
 
+  /users/like:
+      post:
+        tags:
+          - user
+        summary: Like a recipe
+        description: Add a like to a recipe by the logged-in user.
+        operationId: likeRecipe
+        requestBody:
+          description: Recipe to like
+          required: true
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  recipeId:
+                    type: integer
+                    example: 12345
+                required:
+                  - recipeId
+        responses:
+          "200":
+            description: Like added successfully
+          "400":
+            description: Invalid input
+          "401":
+            description: Unauthorized
+        security:
+          - cookieAuth: []
+      delete:
+        tags:
+          - user
+        summary: Unlike a recipe
+        description: Remove a like from a recipe by the logged-in user.
+        operationId: unlikeRecipe
+        requestBody:
+          description: Recipe to unlike
+          required: true
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  recipeId:
+                    type: integer
+                    example: 12345
+                required:
+                  - recipeId
+        responses:
+          "200":
+            description: Like deleted successfully
+          "400":
+            description: Invalid input
+          "401":
+            description: Unauthorized
+        security:
+          - cookieAuth: []
+  /recipes/recipeLikes:
+    get:
+      tags:
+        - receipe
+      summary: Get number of likes for a recipe
+      description: Retrieve the number of likes for a specific recipe.
+      operationId: getRecipeLikes
+      parameters:
+        - name: recipeId
+          in: query
+          required: true
+          schema:
+            type: integer
+          description: The ID of the recipe
+      responses:
+        "200":
+          description: Number of likes retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: integer
+                example: 42
+        "400":
+          description: Invalid recipe ID
+
+  /users/userLikedRecipe:
+    get:
+      tags:
+        - user
+      summary: Check if user liked a recipe
+      description: Check if the logged-in user has liked a specific recipe.
+      operationId: isUserLikedRecipe
+      parameters:
+        - name: recipeId
+          in: query
+          required: true
+          schema:
+            type: integer
+          description: The ID of the recipe
+      responses:
+        "200":
+          description: Whether the user liked the recipe
+          content:
+            application/json:
+              schema:
+                type: boolean
+                example: true
+        "400":
+          description: Invalid recipe ID
+        "401":
+          description: Unauthorized
+      security:
+        - cookieAuth: []
 
   /recipes/random:
     get:
