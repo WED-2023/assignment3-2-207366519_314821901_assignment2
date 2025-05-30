@@ -7,16 +7,25 @@ const recipe_utils = require("./utils/recipes_utils");
 /**
  * Authenticate all incoming requests by middleware
  */
+
 router.use(async function (req, res, next) {
-  if (req.session && req.session.user_id) {
-    DButils.execQuery("SELECT user_id FROM users").then((users) => {
+  try {
+    // Mock user_id for testing - Replace with actual authentication logic
+    // req.session.user_id = 1; 
+    if (req.session && req.session.user_id) {
+      const users = await DButils.execQuery("SELECT user_id FROM users");
       if (users.find((x) => x.user_id === req.session.user_id)) {
         req.user_id = req.session.user_id;
         next();
+      } else {
+        res.status(401).send("User not found");
       }
-    }).catch(err => next(err));
-  } else {
-    res.sendStatus(401);
+    } else {
+      res.status(401).send("No session found");
+    }
+  } catch (err) {
+    console.error("Authentication middleware error:", err);
+    next(err);
   }
 });
 
@@ -28,7 +37,8 @@ router.post('/favorites', async (req,res,next) => {
   try{
     const user_id = req.session.user_id;
     const recipe_id = req.body.recipeId;
-    await user_utils.markAsFavorite(user_id,recipe_id);
+    const internalRecipe = req.body.internalRecipe || false; //default to false if not provided
+    await user_utils.markAsFavorite(user_id,recipe_id, internalRecipe);
     res.status(200).send("The Recipe successfully saved as favorite");
     } catch(error){
     next(error);
@@ -41,18 +51,127 @@ router.post('/favorites', async (req,res,next) => {
 router.get('/favorites', async (req,res,next) => {
   try{
     const user_id = req.session.user_id;
-    let favorite_recipes = {};
-    const recipes_id = await user_utils.getFavoriteRecipes(user_id);
-    let recipes_id_array = [];
-    recipes_id.map((element) => recipes_id_array.push(element.recipe_id)); //extracting the recipe ids into array
-    const results = await recipe_utils.getRecipesPreview(recipes_id_array);
-    res.status(200).send(results);
+    console.log("User ID:", user_id); 
+    const favorites = await user_utils.getFavoriteRecipes(user_id);
+    const results = await recipe_utils.getRecipesByArray(favorites);
+    res.status(200).json(results);
   } catch(error){
     next(error); 
   }
 });
 
+router.delete("/remove", async (req, res, next) => {
+  try {
+    const userId = req.session.user_id;
+    const { recipeId } = req.body;
 
+    if (!recipeId) {
+      return res.status(400).send("Missing recipeId");
+    }
+
+    await user_utils.removeFavoriteRecipe(userId, recipeId);
+    res.status(200).send("Recipe removed from favorites");
+  } catch (err) {
+    next(err);
+  }
+});
+
+
+router.post("/history", async (req, res, next) => {
+  try {
+    const userId = req.session.user_id;
+    const {recipeId, internalRecipe } = req.body;
+    await user_utils.addToHistoryRecipes(userId, recipeId, internalRecipe);
+    res.status(200).send("Recipe added successfully.");
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get("/history", async (req, res, next) => {
+  try {
+    const userId = req.session.user_id;
+    const history = await user_utils.getHistoryRecipes(userId);
+    console.log(history)
+    res.status(200).json(history);
+  } catch (error) {
+    next(error);
+  }
+});
+
+  router.post("/RecipeDB", async (req, res, next) => {
+    try {
+      await user_utils.addRecipeToDB(req.body);
+      res.status(201).send("Recipe successfully added to database");
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  router.get("/RecipeDB", async (req, res, next) => {
+    try {
+      const recipeId = req.query.recipeId;
+      if (!recipeId) {
+        return res.status(400).send("Missing recipeId query parameter.");
+      }
+
+      const recipe = await user_utils.getRecipeFromDB(recipeId);
+      res.status(200).json(recipe);
+    } catch (error) {
+      if (error.message === "Recipe not found in DB") {
+        res.status(404).send(error.message);
+      } else {
+        next(error);
+      }
+    }
+  });
+
+  router.get('/familyrecipes', async (req, res) => {
+    try {
+      const user_id = req.session.user_id;
+      const family_recipes = await user_utils.getFamilyRecipes(user_id);
+      res.status(200).send(family_recipes);
+    } catch (error) {
+      console.error("Error fetching family recipes:", error);
+      res.status(500).send({ message: "Internal Server Error" });
+    }
+  });
+
+
+router.post("/like", async (req, res, next) => {
+  try {
+    const user_id = req.session.user_id;
+    const recipeId = req.body.recipeId;
+    await user_utils.addLike(user_id, recipeId);
+    res.status(200).send("like added successfully");
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.delete("/like", async (req, res, next) => {
+  try {
+    const user_id = req.session.user_id;
+    const recipeId = req.body.recipeId;
+    await user_utils.deleteLike(user_id, recipeId);
+    res.status(200).send("like deleted successfully");
+  } catch (error) {
+    next(error);
+  }
+});
+
+
+
+router.get("/userLikedRecipe", async (req, res, next) => {
+  try {
+    const user_id = req.session.user_id;
+    const recipeId = req.query.recipeId;
+    const isLiked = await user_utils.isUserLikedRecipe(user_id, recipeId);
+    res.status(200).send(isLiked);
+  } catch (error) {
+    next(error);
+  }
+})
 
 
 module.exports = router;

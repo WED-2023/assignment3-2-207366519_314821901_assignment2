@@ -18,6 +18,7 @@ router.post("/Register", async (req, res, next) => {
       email: req.body.email,
       profilePic: req.body.profilePic
     }
+    
     let users = [];
     users = await DButils.execQuery("SELECT username from users");
 
