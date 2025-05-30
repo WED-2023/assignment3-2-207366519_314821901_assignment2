@@ -104,99 +104,99 @@ paths:
         schema:
           type: string
           example: pasta
-      # - name: cuisine
-      #   in: query
-      #   description: Filter recipes by one or more cuisine types (comma-separated)
-      #   required: false
-      #   style: form
-      #   explode: false
-      #   schema:
-      #     type: array
-      #     example:
-      #     - Italian
-      #     - Greek
-      #     items:
-      #       type: string
-      #       enum:
-      #       - African
-      #       - Asian
-      #       - American
-      #       - British
-      #       - Cajun
-      #       - Caribbean
-      #       - Chinese
-      #       - Eastern European
-      #       - European
-      #       - French
-      #       - German
-      #       - Greek
-      #       - Indian
-      #       - Irish
-      #       - Italian
-      #       - Japanese
-      #       - Jewish
-      #       - Korean
-      #       - Latin American
-      #       - Mediterranean
-      #       - Mexican
-      #       - Middle Eastern
-      #       - Nordic
-      #       - Southern
-      #       - Spanish
-      #       - Thai
-      #       - Vietnamese
-      # - name: diet
-      #   in: query
-      #   description: Filter recipes by one or more diet types (comma-separated)
-      #   required: false
-      #   style: form
-      #   explode: false
-      #   schema:
-      #     type: array
-      #     example:
-      #     - vegetarian
-      #     - vegan
-      #     items:
-      #       type: string
-      #       enum:
-      #       - gluten free
-      #       - ketogenic
-      #       - vegetarian
-      #       - lacto-vegetarian
-      #       - ovo-vegetarian
-      #       - vegan
-      #       - pescetarian
-      #       - paleo
-      #       - primal
-      #       - low FODMAP
-      #       - whole30
-      # - name: intolerances
-      #   in: query
-      #   description: Filter recipes by one or more intolerances (comma-separated)
-      #   required: false
-      #   style: form
-      #   explode: false
-      #   schema:
-      #     type: array
-      #     example:
-      #     - gluten
-      #     - peanut
-      #     - dairy
-      #     items:
-      #       type: string
-      #       enum:
-      #       - dairy
-      #       - egg
-      #       - gluten
-      #       - grain
-      #       - peanut
-      #       - seafood
-      #       - sesame
-      #       - shellfish
-      #       - soy
-      #       - sulfite
-      #       - tree nut
-      #       - wheat
+      - name: cuisine
+        in: query
+        description: Filter recipes by one or more cuisine types (comma-separated)
+        required: false
+        style: form
+        explode: false
+        schema:
+          type: array
+          example:
+          - Italian
+          - Greek
+          items:
+            type: string
+            enum:
+            - African
+            - Asian
+            - American
+            - British
+            - Cajun
+            - Caribbean
+            - Chinese
+            - Eastern European
+            - European
+            - French
+            - German
+            - Greek
+            - Indian
+            - Irish
+            - Italian
+            - Japanese
+            - Jewish
+            - Korean
+            - Latin American
+            - Mediterranean
+            - Mexican
+            - Middle Eastern
+            - Nordic
+            - Southern
+            - Spanish
+            - Thai
+            - Vietnamese
+      - name: diet
+        in: query
+        description: Filter recipes by one or more diet types (comma-separated)
+        required: false
+        style: form
+        explode: false
+        schema:
+          type: array
+          example:
+          - vegetarian
+          - vegan
+          items:
+            type: string
+            enum:
+            - gluten free
+            - ketogenic
+            - vegetarian
+            - lacto-vegetarian
+            - ovo-vegetarian
+            - vegan
+            - pescetarian
+            - paleo
+            - primal
+            - low FODMAP
+            - whole30
+      - name: intolerances
+        in: query
+        description: Filter recipes by one or more intolerances (comma-separated)
+        required: false
+        style: form
+        explode: false
+        schema:
+          type: array
+          example:
+          - gluten
+          - peanut
+          - dairy
+          items:
+            type: string
+            enum:
+            - dairy
+            - egg
+            - gluten
+            - grain
+            - peanut
+            - seafood
+            - sesame
+            - shellfish
+            - soy
+            - sulfite
+            - tree nut
+            - wheat
       responses:
         "200":
           description: search results matching criteria
@@ -211,10 +211,10 @@ paths:
   /recipes/RecipeDB:
     post:
       tags:
-      - receipe
-      summary: Add a new receipe to the website.
-      description: Add a new receipe to the website.
-      operationId: addReceipe
+      - user
+      summary: Add a new receipe to the user's database.
+      description: Add a new receipe to the user's database.
+      operationId: addRecipeToDB
       requestBody:
         description: Receipe added
         content:
@@ -228,10 +228,10 @@ paths:
           description: "invalid input, object invalid"
     get:
       tags:
-        - receipe
+        - user
       summary: Get an internal receipe by ID
-      description: Retrieve a specific internal r ecipe stored in the website's database.
-      operationId: getInternalReceipe
+      description: Retrieve a specific internal receipe stored in the user's database.
+      operationId: getRecipeFromDB
       parameters:
         - name: recipeId
           in: query
@@ -478,7 +478,20 @@ paths:
                       example: true
         "401":
           description: Unauthorized
-
+  /users/familyrecipes:
+    get:
+      tags:
+        - user
+      summary: Get user's family recipes
+      description: Retrieve the list of family recipes for the logged-in user.
+      operationId: getFamilyRecipes
+      responses:
+        "200":
+          description: List of family recipes retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
 
   
 
