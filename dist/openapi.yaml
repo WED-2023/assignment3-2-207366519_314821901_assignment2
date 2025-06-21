@@ -442,17 +442,13 @@ paths:
             schema:
               type: object
               properties:
-                userId:
-                  type: integer
-                  example: 123
                 recipeId:
                   type: integer
-                  example: 101
+                  example: 642583
                 internalRecipe:
                   type: boolean
                   example: true
               required:
-                - userId
                 - recipeId
                 - internalRecipe
       responses:
@@ -462,6 +458,24 @@ paths:
           description: Invalid input, object invalid
         "500":
           description: Server error while recording recipe view
+  /recipes/getLastViewedRecipes:
+    get:
+      tags:
+        - receipe
+      summary: Get the last 3 viewed recipes for a user
+      description: Retrieve the last 3 viewed recipes for a user.
+      operationId: getLastViewedRecipes
+      responses:
+        "200":
+          description: Last 3 viewed recipes retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Receipe'
+        "401":
+          description: Unauthorized
   /users/favorites:
     post:
       tags:

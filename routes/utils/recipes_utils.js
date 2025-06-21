@@ -127,6 +127,16 @@ async function updateLastViewedRecipe(userId, recipeId, internalRecipe) {
         );
     `);
 }
+async function getLastViewedRecipes(userId) {
+    const results = await DButils.execQuery(`
+        SELECT recipeId, lastView, internalRecipe 
+        FROM lastViewRecipes 
+        WHERE userId='${userId}'
+        ORDER BY lastView DESC
+        LIMIT 3;
+    `);
+    return results;
+}
 
 
 
@@ -148,6 +158,7 @@ module.exports = {
   getRecipeDetails,
   getRandomRecipes,
   getRecipeByText,
+  getLastViewedRecipes,
 };
 
 
