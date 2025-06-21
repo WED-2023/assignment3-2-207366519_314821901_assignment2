@@ -1,5 +1,4 @@
 const DButils = require("./DButils");
-const recipes_utils = require("./recipes_utils");
 async function markAsFavorite(user_id, recipe_id, internalRecipe) {
   await DButils.execQuery(`
     INSERT IGNORE INTO favoriteRecipes (userId, recipeId, internalRecipe)
@@ -48,7 +47,7 @@ async function historyEntryExists(userId, recipeId, internalRecipe) {
 }
 async function getRecipeFromDB(recipeId) {
   const results = await DButils.execQuery(`
-    SELECT id, title, image, readyInMinutes, vegan, vegetarian, glutenFree, popularity, instructions, summary, sourceName, extendedIngredients, servings
+    SELECT id, title, image, readyInMinutes, vegan, vegetarian, glutenFree, popularity, analyzedInstructions, summary, sourceName, extendedIngredients, servings
     FROM receipes
     WHERE id = ${recipeId}
     LIMIT 1;
@@ -70,16 +69,16 @@ async function getRecipeFromDB(recipeId) {
   return recipe;
 }
 async function addRecipeToDB(recipe) {
-  let { id, title, image, readyInMinutes, vegan, vegetarian, glutenFree, extendedIngredients, instructions, summary, sourceName, servings } = recipe;
+  let { id, title, image, readyInMinutes, vegan, vegetarian, glutenFree, extendedIngredients, analyzedInstructions, summary, sourceName, servings } = recipe;
   if (!id){
       id = idCounter++;
   }
   // Convert extendedIngredients array to JSON string for storage
   const ingredientsJson = JSON.stringify(extendedIngredients);
-  
+  const instructionsJson = JSON.stringify(analyzedInstructions);
   await DButils.execQuery(`
-      INSERT INTO receipes (id, title, image, readyInMinutes, vegan, vegetarian, glutenFree, popularity, instructions, summary, sourceName, extendedIngredients, servings) 
-      VALUES (${id}, '${title}', '${image}', ${readyInMinutes}, ${vegan}, ${vegetarian}, ${glutenFree}, 0, '${instructions}', '${summary}', '${sourceName}', '${ingredientsJson}', ${servings})
+      INSERT INTO receipes (id, title, image, readyInMinutes, vegan, vegetarian, glutenFree, popularity, analyzedInstructions, summary, sourceName, extendedIngredients, servings) 
+      VALUES (${id}, '${title}', '${image}', ${readyInMinutes}, ${vegan}, ${vegetarian}, ${glutenFree}, 0, '${instructionsJson}', '${summary}', '${sourceName}', '${ingredientsJson}', ${servings})
   `);
 }
 async function getFamilyRecipes(user_id){
@@ -135,7 +134,7 @@ async function isUserLikedRecipe(user_id, recipeId) {
 async function getLastViewedRecipes(userId) {
   console.log('user id issssssssssss :',userId);
   const results = await DButils.execQuery(`
-      SELECT recipeId, lastView, internalRecipe 
+      SELECT recipeId, internalRecipe 
       FROM lastViewRecipes 
       WHERE userId='${userId}'
       ORDER BY lastView DESC
@@ -143,6 +142,43 @@ async function getLastViewedRecipes(userId) {
   `);
   return results;
 }
+
+
+function formatToMySQLDatetime(date) {
+    return date.toISOString().slice(0, 19).replace('T', ' ');
+}
+
+async function updateLastViewedRecipe(userId, recipeId, internalRecipe) {
+    const now = formatToMySQLDatetime(new Date());
+
+    // Delete the current entry if it exists to avoid duplication
+    await DButils.execQuery(`
+        DELETE FROM lastViewRecipes 
+        WHERE userId='${userId}' AND recipeId=${recipeId};
+    `);
+
+    // Insert the new view
+    await DButils.execQuery(`
+        INSERT INTO lastViewRecipes (userId, recipeId, lastView, internalRecipe)
+        VALUES ('${userId}', ${recipeId}, '${now}', ${internalRecipe});
+    `);
+
+    // Delete oldest if more than 3 views exist
+    await DButils.execQuery(`
+        DELETE FROM lastViewRecipes
+        WHERE userId='${userId}' AND recipeId NOT IN (
+            SELECT recipeId FROM (
+                SELECT recipeId FROM lastViewRecipes
+                WHERE userId='${userId}'
+                ORDER BY lastView DESC
+                LIMIT 3
+            ) AS temp
+        );
+    `);
+}
+
+
+
 exports.addLike = addLike;
 exports.deleteLike = deleteLike;
 exports.isUserLikedRecipe = isUserLikedRecipe;
@@ -156,3 +192,4 @@ exports.getRecipeFromDB = getRecipeFromDB;
 exports.addRecipeToDB = addRecipeToDB;
 exports.getFamilyRecipes = getFamilyRecipes;
 exports.getLastViewedRecipes = getLastViewedRecipes;
+exports.updateLastViewedRecipe = updateLastViewedRecipe;

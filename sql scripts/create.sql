@@ -1,4 +1,4 @@
-USE `webprograming3.2`;
+USE `mydb`;
 
 CREATE TABLE IF NOT EXISTS users (
   user_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -20,7 +20,7 @@ create table if not exists receipes (
     vegetarian boolean not null,
     glutenFree boolean not null,
     popularity int not null default 0,
-    instructions text not null,
+    analyzedInstructions text not null,
     summary text not null,
     sourceName varchar(255) not null,
     extendedIngredients text not null,

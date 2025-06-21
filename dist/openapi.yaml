@@ -427,10 +427,10 @@ paths:
           description: Recipe not found
         "500":
           description: External API error or server error
-  /recipes/addToViewRecipe:
+  /users/addToViewRecipe:
     post:
       tags:
-        - receipe
+        - user
       summary: Record a user's recipe view
       description: Records the viewing of a recipe by a user and maintains only their 3 most recent viewed recipes.
       operationId: viewRecipe
@@ -736,7 +736,7 @@ components:
       - glutenFree
       - image
       - extendedIngredients
-      - instructions
+      - analyzedInstructions
       - title
       - readyInMinutes
       - servings
@@ -775,21 +775,148 @@ components:
           example: A classic Italian pasta dish with a rich meat sauce.
         extendedIngredients:
           type: array
-          description: List of ingredients with quantities
-          example:
-          - 200g spaghetti
-          - 300g ground beef
-          - 1 cup tomato sauce
-          - "1 onion, chopped"
-          - "2 cloves garlic, minced"
+          description: Detailed list of ingredients with metadata, quantities, and units
           items:
-            type: string
-        instructions:
-          type: string
-          description: Step-by-step preparation instructions
+            type: object
+            properties:
+              id:
+                type: integer
+                example: 12061
+              aisle:
+                type: string
+                example: "Nuts"
+              image:
+                type: string
+                example: "almonds.jpg"
+              consistency:
+                type: string
+                example: "SOLID"
+              name:
+                type: string
+                example: "almond cookies"
+              nameClean:
+                type: string
+                example: "almond cookies"
+              original:
+                type: string
+                example: "150 grams Almond cookies, crumbed"
+              originalName:
+                type: string
+                example: "Almond cookies, crumbed"
+              amount:
+                type: number
+                example: 150.0
+              unit:
+                type: string
+                example: "grams"
+              meta:
+                type: array
+                items:
+                  type: string
+                example: []
+              measures:
+                type: object
+                properties:
+                  us:
+                    type: object
+                    properties:
+                      amount:
+                        type: number
+                        example: 5.291
+                      unitShort:
+                        type: string
+                        example: "oz"
+                      unitLong:
+                        type: string
+                        example: "ounces"
+                  metric:
+                    type: object
+                    properties:
+                      amount:
+                        type: number
+                        example: 150.0
+                      unitShort:
+                        type: string
+                        example: "g"
+                      unitLong:
+                        type: string
+                        example: "grams"
+        analyzedInstructions:
+          type: array
+          description: "Structured step-by-step preparation instructions"
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              steps:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    number:
+                      type: integer
+                    step:
+                      type: string
+                    ingredients:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          id:
+                            type: integer
+                          name:
+                            type: string
+                          localizedName:
+                            type: string
+                          image:
+                            type: string
+                    equipment:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          id:
+                            type: integer
+                          name:
+                            type: string
+                          localizedName:
+                            type: string
+                          image:
+                            type: string
+                          temperature:
+                            type: object
+                            properties:
+                              number:
+                                type: number
+                              unit:
+                                type: string
+                    length:
+                      type: object
+                      properties:
+                        number:
+                          type: integer
+                        unit:
+                          type: string
           example:
-            type: string
-            example: Cook spaghetti according to package instructions.
+            - name: ""
+              steps:
+                - number: 1
+                  step: "Toss the cookie crumbs into the melted butter..."
+                  ingredients:
+                    - id: 10018192
+                      name: "cookie crumbs"
+                      localizedName: "cookie crumbs"
+                      image: ""
+                    - id: 1001
+                      name: "butter"
+                      localizedName: "butter"
+                      image: "butter-sliced.jpg"
+                  equipment:
+                    - id: 404628
+                      name: "hand mixer"
+                      localizedName: "hand mixer"
+                      image: "https://spoonacular.com/cdn/equipment_100x100/hand-mixer.png"
         sourceName:
           type: string
           description: The user who created or added the recipe to the family collection.

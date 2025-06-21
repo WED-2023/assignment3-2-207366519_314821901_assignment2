@@ -1,6 +1,7 @@
 const axios = require("axios");
 const api_domain = "https://api.spoonacular.com/recipes";
 const DButils = require("../utils/DButils");
+const user_utils = require("./user_utils");
 
 
 /**
@@ -20,7 +21,7 @@ async function getRecipeInformation(recipe_id) {
 
 async function getRecipeDetails(recipe_id) {
     let recipe_info = await getRecipeInformation(recipe_id);
-    let { id, title, readyInMinutes, image, aggregateLikes, vegan, vegetarian, glutenFree, extendedIngredients, instructions, summary, sourceName } = recipe_info.data;
+    let { id, title, readyInMinutes, image, aggregateLikes, vegan, vegetarian, glutenFree, extendedIngredients, analyzedInstructions, summary, sourceName } = recipe_info.data;
     return {
         id: id,
         title: title,
@@ -31,7 +32,7 @@ async function getRecipeDetails(recipe_id) {
         vegetarian: vegetarian,
         glutenFree: glutenFree,
         extendedIngredients: extendedIngredients,
-        instructions: instructions,
+        analyzedInstructions: analyzedInstructions,
         summary: summary,
         sourceName: sourceName,
     }
@@ -41,7 +42,7 @@ async function getRecipesByArray(recipesArray) {
   return await Promise.all(
     recipesArray.map(({ recipeId, internalRecipe }) => {
       if (internalRecipe) {
-        return getRecipeFromDB(recipeId);
+        return user_utils.getRecipeFromDB(recipeId);
       } else {
         return getRecipeDetails(recipeId);
       }
@@ -71,7 +72,7 @@ async function getRandomRecipes() {
             vegetarian: recipe.vegetarian,
             glutenFree: recipe.glutenFree,
             extendedIngredients: recipe.extendedIngredients,
-            instructions: recipe.instructions,
+            analyzedInstructions: recipe.analyzedInstructions,
             summary: recipe.summary,
             sourceName: recipe.sourceName,
         }
@@ -95,38 +96,38 @@ async function getRecipeByText(text, number, cuisine=null, diet=null, intoleranc
 }
 
 
-function formatToMySQLDatetime(date) {
-    return date.toISOString().slice(0, 19).replace('T', ' ');
-}
+// function formatToMySQLDatetime(date) {
+//     return date.toISOString().slice(0, 19).replace('T', ' ');
+// }
 
-async function updateLastViewedRecipe(userId, recipeId, internalRecipe) {
-    const now = formatToMySQLDatetime(new Date());
+// async function updateLastViewedRecipe(userId, recipeId, internalRecipe) {
+//     const now = formatToMySQLDatetime(new Date());
 
-    // Delete the current entry if it exists to avoid duplication
-    await DButils.execQuery(`
-        DELETE FROM lastViewRecipes 
-        WHERE userId='${userId}' AND recipeId=${recipeId};
-    `);
+//     // Delete the current entry if it exists to avoid duplication
+//     await DButils.execQuery(`
+//         DELETE FROM lastViewRecipes 
+//         WHERE userId='${userId}' AND recipeId=${recipeId};
+//     `);
 
-    // Insert the new view
-    await DButils.execQuery(`
-        INSERT INTO lastViewRecipes (userId, recipeId, lastView, internalRecipe)
-        VALUES ('${userId}', ${recipeId}, '${now}', ${internalRecipe});
-    `);
+//     // Insert the new view
+//     await DButils.execQuery(`
+//         INSERT INTO lastViewRecipes (userId, recipeId, lastView, internalRecipe)
+//         VALUES ('${userId}', ${recipeId}, '${now}', ${internalRecipe});
+//     `);
 
-    // Delete oldest if more than 3 views exist
-    await DButils.execQuery(`
-        DELETE FROM lastViewRecipes
-        WHERE userId='${userId}' AND recipeId NOT IN (
-            SELECT recipeId FROM (
-                SELECT recipeId FROM lastViewRecipes
-                WHERE userId='${userId}'
-                ORDER BY lastView DESC
-                LIMIT 3
-            ) AS temp
-        );
-    `);
-}
+//     // Delete oldest if more than 3 views exist
+//     await DButils.execQuery(`
+//         DELETE FROM lastViewRecipes
+//         WHERE userId='${userId}' AND recipeId NOT IN (
+//             SELECT recipeId FROM (
+//                 SELECT recipeId FROM lastViewRecipes
+//                 WHERE userId='${userId}'
+//                 ORDER BY lastView DESC
+//                 LIMIT 3
+//             ) AS temp
+//         );
+//     `);
+// }
 // async function getLastViewedRecipes(userId) {
 //     const results = await DButils.execQuery(`
 //         SELECT recipeId, lastView, internalRecipe 
@@ -154,7 +155,7 @@ async function getRecipeLikes(recipeId) {
 module.exports = {
   getRecipeLikes,
   getRecipesByArray,
-  updateLastViewedRecipe,
+//   updateLastViewedRecipe,
   getRecipeDetails,
   getRandomRecipes,
   getRecipeByText,
