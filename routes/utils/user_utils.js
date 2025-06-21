@@ -132,6 +132,17 @@ async function isUserLikedRecipe(user_id, recipeId) {
     return likes[0].likesCount > 0;
 }
 
+async function getLastViewedRecipes(userId) {
+  console.log('user id issssssssssss :',userId);
+  const results = await DButils.execQuery(`
+      SELECT recipeId, lastView, internalRecipe 
+      FROM lastViewRecipes 
+      WHERE userId='${userId}'
+      ORDER BY lastView DESC
+      LIMIT 3;
+  `);
+  return results;
+}
 exports.addLike = addLike;
 exports.deleteLike = deleteLike;
 exports.isUserLikedRecipe = isUserLikedRecipe;
@@ -144,3 +155,4 @@ exports.getFavoriteRecipes = getFavoriteRecipes;
 exports.getRecipeFromDB = getRecipeFromDB;
 exports.addRecipeToDB = addRecipeToDB;
 exports.getFamilyRecipes = getFamilyRecipes;
+exports.getLastViewedRecipes = getLastViewedRecipes;

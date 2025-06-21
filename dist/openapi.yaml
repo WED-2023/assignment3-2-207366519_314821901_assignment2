@@ -458,10 +458,10 @@ paths:
           description: Invalid input, object invalid
         "500":
           description: Server error while recording recipe view
-  /recipes/getLastViewedRecipes:
+  /users/getLastViewedRecipes:
     get:
       tags:
-        - receipe
+        - user
       summary: Get the last 3 viewed recipes for a user
       description: Retrieve the last 3 viewed recipes for a user.
       operationId: getLastViewedRecipes

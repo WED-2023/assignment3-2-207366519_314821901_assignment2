@@ -12,6 +12,7 @@ router.use(async function (req, res, next) {
   try {
     // Mock user_id for testing - Replace with actual authentication logic
     // req.session.user_id = 1; 
+    console.log("user iddddddd :",req.session.user_id);
     if (req.session && req.session.user_id) {
       const users = await DButils.execQuery("SELECT user_id FROM users");
       if (users.find((x) => x.user_id === req.session.user_id)) {
@@ -171,7 +172,17 @@ router.get("/userLikedRecipe", async (req, res, next) => {
   } catch (error) {
     next(error);
   }
-})
+});
+router.get("/getLastViewedRecipes", async (req, res, next) => {
+  try {
+    const userId = req.session.user_id;
+    console.log("user id issssssssssss :",userId);
+    const lastViewed = await user_utils.getLastViewedRecipes(userId);
+    res.status(200).json(lastViewed);
+  } catch (error) {
+    next(error);
+  }
+});
 
 
 module.exports = router;
