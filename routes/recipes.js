@@ -6,7 +6,7 @@ router.get("/", (req, res) => res.send("im here"));
 
 router.get("/random", async (req, res, next) => {
   try {
-    const recipes = await recipes_utils.getRandomRecipes();
+    const recipes = await recipes_utils.getRandomRecipes(req.session.user_id);
     res.send(recipes);
   } catch (error) {
     next(error);
@@ -18,7 +18,7 @@ router.get("/random", async (req, res, next) => {
  */
 router.get("/searchById/:recipeId", async (req, res, next) => {
   try {
-    const recipe = await recipes_utils.getRecipeDetails(req.params.recipeId);
+    const recipe = await recipes_utils.getRecipeDetails(req.params.recipeId, req.session.user_id);
     res.send(recipe);
   } catch (error) {
     next(error);
@@ -26,8 +26,9 @@ router.get("/searchById/:recipeId", async (req, res, next) => {
 });
 
 router.get("/search", async (req, res, next) => { 
+  console.log("check search in recipes",req.session.user_id)
   try {
-    const recipes = await recipes_utils.getRecipeByText(req.query.query, req.query.number || 5, req.query.cuisine, req.query.diet, req.query.intolerance);
+    const recipes = await recipes_utils.getRecipeByText(req.session.user_id,req.query.query, req.query.number || 5, req.query.cuisine, req.query.diet, req.query.intolerance);
     res.send(recipes);
   } catch (error) {
     next(error);

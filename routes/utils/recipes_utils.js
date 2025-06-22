@@ -19,9 +19,11 @@ async function getRecipeInformation(recipe_id) {
     });
 }
 
-async function getRecipeDetails(recipe_id) {
+async function getRecipeDetails(recipe_id,userId) {
     let recipe_info = await getRecipeInformation(recipe_id);
     let { id, title, readyInMinutes, image, aggregateLikes, vegan, vegetarian, glutenFree, extendedIngredients, analyzedInstructions, summary, sourceName } = recipe_info.data;
+    const viewed = await isViewedRecipe(userId, recipe_id);
+    const favorite = await isFavoriteRecipe(userId, recipe_id);
     return {
         id: id,
         title: title,
@@ -35,24 +37,32 @@ async function getRecipeDetails(recipe_id) {
         analyzedInstructions: analyzedInstructions,
         summary: summary,
         sourceName: sourceName,
+        isViewedRecipe: viewed,
+        isFavoriteRecipe: favorite
     }
 }
 
-async function getRecipesByArray(recipesArray) {
+async function getRecipesByArray(recipesArray,userId) {
+    console.log("recipesArray", recipesArray);
+    console.log("userId", userId);
   return await Promise.all(
     recipesArray.map(({ recipeId, internalRecipe }) => {
       if (internalRecipe) {
-        return user_utils.getRecipeFromDB(recipeId);
+        const recipe = user_utils.getRecipeFromDB(recipeId);
+        recipe.isViewedRecipe = true;
+        recipe.isFavoriteRecipe = isFavoriteRecipe(userId, recipeId);
+        return recipe
       } else {
-        return getRecipeDetails(recipeId);
+        return getRecipeDetails(recipeId, userId);
       }
     })
   );
 }
 
 async function isViewedRecipe(userId,recipeId) {
+    console.log("Checking if recipe is viewed for user:", userId, "recipeId:", recipeId);
     const result = await DButils.execQuery(`
-        SELECT * FROM historyviewrecipes WHERE userId=${userId} AND recipeId=${recipeId}
+        SELECT * FROM historyviewrecipes WHERE userId='${userId}' AND recipeId=${recipeId}
     `);
     return result.length > 0 ? true : false;
 }
@@ -66,32 +76,38 @@ async function isFavoriteRecipe(userId,recipeId) {
 
 
 
-async function getRandomRecipes() {
-    const respone = await axios.get(`${api_domain}/random`, {
-        params: {
-            number: 3,
-            apiKey: process.env.spooncular_apiKey
-        }
-    });
-    return respone.data.recipes.map(recipe => {
-        return {
-            id: recipe.id,
-            title: recipe.title,
-            readyInMinutes: recipe.readyInMinutes,
-            image: recipe.image,
-            popularity: recipe.aggregateLikes,
-            vegan: recipe.vegan,
-            vegetarian: recipe.vegetarian,
-            glutenFree: recipe.glutenFree,
-            extendedIngredients: recipe.extendedIngredients,
-            analyzedInstructions: recipe.analyzedInstructions,
-            summary: recipe.summary,
-            sourceName: recipe.sourceName,
-        }
-    });
+async function getRandomRecipes(userId) {
+  const response = await axios.get(`${api_domain}/random`, {
+    params: {
+      number: 3,
+      apiKey: process.env.spooncular_apiKey
+    }
+  });
+
+  const recipePromises = response.data.recipes.map(async recipe => {
+    return {
+      id: recipe.id,
+      title: recipe.title,
+      readyInMinutes: recipe.readyInMinutes,
+      image: recipe.image,
+      popularity: recipe.aggregateLikes,
+      vegan: recipe.vegan,
+      vegetarian: recipe.vegetarian,
+      glutenFree: recipe.glutenFree,
+      extendedIngredients: recipe.extendedIngredients,
+      analyzedInstructions: recipe.analyzedInstructions,
+      summary: recipe.summary,
+      sourceName: recipe.sourceName,
+      isViewedRecipe: await isViewedRecipe(userId, recipe.id),
+      isFavoriteRecipe: await isFavoriteRecipe(userId, recipe.id)
+    };
+  });
+
+  return Promise.all(recipePromises); // resolves all async recipe mappings
 }
 
-async function getRecipeByText(text, number, cuisine=null, diet=null, intolerance=null) {
+
+async function getRecipeByText(userId,text, number, cuisine=null, diet=null, intolerance=null) {
     const respone = await axios.get(`${api_domain}/complexSearch`, {
         params: {
             query: text,
@@ -103,7 +119,7 @@ async function getRecipeByText(text, number, cuisine=null, diet=null, intoleranc
         }
     });
     const recipes_id = respone.data.results.map(recipe => {return {recipeId:recipe.id,internalRecipe:false}});
-    const recipes_details = await getRecipesByArray(recipes_id);
+    const recipes_details = await getRecipesByArray(recipes_id,userId);
     return recipes_details;
 }
 

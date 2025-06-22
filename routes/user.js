@@ -178,7 +178,7 @@ router.get("/getLastViewedRecipes", async (req, res, next) => {
     const userId = req.session.user_id;
     console.log("user id in getLastViewedRecipes:",userId);
     const lastViewed = await user_utils.getLastViewedRecipes(userId);
-    const results = await recipe_utils.getRecipesByArray(lastViewed);
+    const results = await recipe_utils.getRecipesByArray(lastViewed, userId);
     res.send(results);
   } catch (error) {
     next(error);
