@@ -39,32 +39,6 @@ router.get("/search", async (req, res, next) => {
  */
 
 
-
-
-
-// router.post("/addToViewRecipe", async (req, res, next) => {
-//   try {
-//     const userId = req.session.user_id;
-//     const {recipeId, internalRecipe } = req.body;
-//     await recipes_utils.updateLastViewedRecipe(userId, recipeId, internalRecipe);
-//     res.status(200).send("Recipe view recorded.");
-//   } catch (error) {
-//     next(error);
-//   }
-// });
-
-// router.get("/getLastViewedRecipes", async (req, res, next) => {
-//   try {
-//     const userId = req.session.user_id;
-
-//     // Fetch the last 3 viewed recipes for this user
-//     const lastViewed = await recipes_utils.getLastViewedRecipes(userId);
-//     res.status(200).json(lastViewed);
-//   } catch (error) {
-//     next(error);
-//   }
-// });
-
 //TODO- In the frontend we need to intergrate the users likes with the spooncular likes
 router.get("/recipeLikes", async (req, res, next) => {
   try {

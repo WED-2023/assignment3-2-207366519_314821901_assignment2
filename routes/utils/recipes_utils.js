@@ -49,7 +49,19 @@ async function getRecipesByArray(recipesArray) {
     })
   );
 }
-    
+
+async function isViewedRecipe(userId,recipeId) {
+    const result = await DButils.execQuery(`
+        SELECT * FROM historyviewrecipes WHERE userId=${userId} AND recipeId=${recipeId}
+    `);
+    return result.length > 0 ? true : false;
+}
+async function isFavoriteRecipe(userId,recipeId) {
+    const result = await DButils.execQuery(`
+        SELECT * FROM favoriterecipes WHERE userId=${userId} AND recipeId=${recipeId}
+    `);
+    return result.length > 0 ? true : false;
+}
 
 
 
