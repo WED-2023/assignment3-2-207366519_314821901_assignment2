@@ -66,6 +66,7 @@ async function getRecipeFromDB(recipeId) {
   recipe.vegan = Boolean(recipe.vegan);
   recipe.vegetarian = Boolean(recipe.vegetarian);
   recipe.glutenFree = Boolean(recipe.glutenFree);
+  recipe.internal = true;
   return recipe;
 }
 async function addRecipeToDB(recipe) {

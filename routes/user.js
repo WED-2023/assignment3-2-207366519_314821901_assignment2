@@ -190,6 +190,7 @@ router.post("/addToViewRecipe", async (req, res, next) => {
     const userId = req.session.user_id;
     const {recipeId, internalRecipe } = req.body;
     await user_utils.updateLastViewedRecipe(userId, recipeId, internalRecipe);
+    await user_utils.addToHistoryRecipes(userId, recipeId, internalRecipe);
     res.status(200).send("Recipe view recorded.");
   } catch (error) {
     next(error);
