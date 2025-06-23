@@ -47,7 +47,7 @@ async function historyEntryExists(userId, recipeId, internalRecipe) {
 }
 async function getRecipeFromDB(recipeId) {
   const results = await DButils.execQuery(`
-    SELECT id, title, image, readyInMinutes, vegan, vegetarian, glutenFree, popularity, analyzedInstructions, summary, sourceName, extendedIngredients, servings
+    SELECT id, title, image, readyInMinutes, vegan, vegetarian, glutenFree, popularity, analyzedInstructions, summary, userId, extendedIngredients, servings
     FROM receipes
     WHERE id = ${recipeId}
     LIMIT 1;
@@ -69,17 +69,15 @@ async function getRecipeFromDB(recipeId) {
   recipe.internal = true;
   return recipe;
 }
-async function addRecipeToDB(recipe) {
-  let { id, title, image, readyInMinutes, vegan, vegetarian, glutenFree, extendedIngredients, analyzedInstructions, summary, sourceName, servings } = recipe;
-  if (!id){
-      id = idCounter++;
-  }
+async function addRecipeToDB(recipe,userId) {
+  let {title, image, readyInMinutes, vegan, vegetarian, glutenFree, extendedIngredients, analyzedInstructions, summary,servings } = recipe;
+
   // Convert extendedIngredients array to JSON string for storage
   const ingredientsJson = JSON.stringify(extendedIngredients);
   const instructionsJson = JSON.stringify(analyzedInstructions);
   await DButils.execQuery(`
-      INSERT INTO receipes (id, title, image, readyInMinutes, vegan, vegetarian, glutenFree, popularity, analyzedInstructions, summary, sourceName, extendedIngredients, servings) 
-      VALUES (${id}, '${title}', '${image}', ${readyInMinutes}, ${vegan}, ${vegetarian}, ${glutenFree}, 0, '${instructionsJson}', '${summary}', '${sourceName}', '${ingredientsJson}', ${servings})
+      INSERT INTO receipes (title, image, readyInMinutes, vegan, vegetarian, glutenFree, popularity, analyzedInstructions, summary, userId, extendedIngredients, servings) 
+      VALUES ('${title}', '${image}', ${readyInMinutes}, ${vegan}, ${vegetarian}, ${glutenFree}, 0, '${instructionsJson}', '${summary}', '${userId}', '${ingredientsJson}', ${servings})
   `);
 }
 async function getFamilyRecipes(user_id){
@@ -133,7 +131,6 @@ async function isUserLikedRecipe(user_id, recipeId) {
 }
 
 async function getLastViewedRecipes(userId) {
-  console.log('user id issssssssssss :',userId);
   const results = await DButils.execQuery(`
       SELECT recipeId, internalRecipe 
       FROM lastViewRecipes 

@@ -308,7 +308,7 @@ paths:
             description: Unauthorized
         security:
           - cookieAuth: []
-  /recipes/recipeLikes:
+  /recipes/like:
     get:
       tags:
         - receipe
@@ -521,7 +521,6 @@ paths:
                   $ref: '#/components/schemas/Receipe'
         "401":
           description: Unauthorized
-  /users/remove:
     delete:
       tags:
         - user

@@ -24,12 +24,13 @@ async function getRecipeDetails(recipe_id,userId) {
     let { id, title, readyInMinutes, image, aggregateLikes, vegan, vegetarian, glutenFree, extendedIngredients, analyzedInstructions, summary, sourceName } = recipe_info.data;
     const viewed = await isViewedRecipe(userId, recipe_id);
     const favorite = await isFavoriteRecipe(userId, recipe_id);
+    const likes = await getRecipeLikes(recipe_id);
     return {
         id: id,
         title: title,
         readyInMinutes: readyInMinutes,
         image: image,
-        popularity: aggregateLikes,
+        popularity: aggregateLikes + likes,
         vegan: vegan,
         vegetarian: vegetarian,
         glutenFree: glutenFree,
@@ -49,8 +50,10 @@ async function getRecipesByArray(recipesArray,userId) {
     recipesArray.map(({ recipeId, internalRecipe }) => {
       if (internalRecipe) {
         const recipe = user_utils.getRecipeFromDB(recipeId);
+        const likes = getRecipeLikes(recipeId);
         recipe.isViewedRecipe = true;
         recipe.isFavoriteRecipe = isFavoriteRecipe(userId, recipeId);
+        recipe.popularity += likes;
         return recipe
       } else {
         return getRecipeDetails(recipeId, userId);
@@ -85,12 +88,13 @@ async function getRandomRecipes(userId) {
   });
 
   const recipePromises = response.data.recipes.map(async recipe => {
+    const likes = await getRecipeLikes(recipe.id);
     return {
       id: recipe.id,
       title: recipe.title,
       readyInMinutes: recipe.readyInMinutes,
       image: recipe.image,
-      popularity: recipe.aggregateLikes,
+      popularity: recipe.aggregateLikes + likes,
       vegan: recipe.vegan,
       vegetarian: recipe.vegetarian,
       glutenFree: recipe.glutenFree,
@@ -124,57 +128,11 @@ async function getRecipeByText(userId,text, number, cuisine=null, diet=null, int
 }
 
 
-// function formatToMySQLDatetime(date) {
-//     return date.toISOString().slice(0, 19).replace('T', ' ');
-// }
-
-// async function updateLastViewedRecipe(userId, recipeId, internalRecipe) {
-//     const now = formatToMySQLDatetime(new Date());
-
-//     // Delete the current entry if it exists to avoid duplication
-//     await DButils.execQuery(`
-//         DELETE FROM lastViewRecipes 
-//         WHERE userId='${userId}' AND recipeId=${recipeId};
-//     `);
-
-//     // Insert the new view
-//     await DButils.execQuery(`
-//         INSERT INTO lastViewRecipes (userId, recipeId, lastView, internalRecipe)
-//         VALUES ('${userId}', ${recipeId}, '${now}', ${internalRecipe});
-//     `);
-
-//     // Delete oldest if more than 3 views exist
-//     await DButils.execQuery(`
-//         DELETE FROM lastViewRecipes
-//         WHERE userId='${userId}' AND recipeId NOT IN (
-//             SELECT recipeId FROM (
-//                 SELECT recipeId FROM lastViewRecipes
-//                 WHERE userId='${userId}'
-//                 ORDER BY lastView DESC
-//                 LIMIT 3
-//             ) AS temp
-//         );
-//     `);
-// }
-// async function getLastViewedRecipes(userId) {
-//     const results = await DButils.execQuery(`
-//         SELECT recipeId, lastView, internalRecipe 
-//         FROM lastViewRecipes 
-//         WHERE userId='${userId}'
-//         ORDER BY lastView DESC
-//         LIMIT 3;
-//     `);
-//     return results;
-// }
-
-
-
-
 async function getRecipeLikes(recipeId) {
     const likes = await DButils.execQuery(`
         SELECT COUNT(*) AS likesCount
-        FROM likes
-        WHERE recipe_id=${recipeId}
+        FROM favoriterecipes
+        WHERE recipeId=${recipeId}
     `);
     return likes[0].likesCount;
 }

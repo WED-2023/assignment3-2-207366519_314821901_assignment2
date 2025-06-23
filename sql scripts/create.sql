@@ -11,21 +11,23 @@ CREATE TABLE IF NOT EXISTS users (
   );
 
 
-create table if not exists receipes (
-    id int primary key,
-    title varchar(255) not null,
-    image varchar(255) not null,
-    readyInMinutes int not null,
-    vegan boolean not null,
-    vegetarian boolean not null,
-    glutenFree boolean not null,
-    popularity int not null default 0,
-    analyzedInstructions text not null,
-    summary text not null,
-    sourceName varchar(255) not null,
-    extendedIngredients text not null,
-    servings int not null
+CREATE TABLE IF NOT EXISTS receipes (
+    id INT AUTO_INCREMENT,
+    title VARCHAR(255) NOT NULL,
+    image VARCHAR(255) NOT NULL,
+    readyInMinutes INT NOT NULL,
+    vegan BOOLEAN NOT NULL,
+    vegetarian BOOLEAN NOT NULL,
+    glutenFree BOOLEAN NOT NULL,
+    popularity INT NOT NULL DEFAULT 0,
+    analyzedInstructions TEXT NOT NULL,
+    summary TEXT NOT NULL,
+    userId INT NOT NULL,
+    extendedIngredients TEXT NOT NULL,
+    servings INT NOT NULL,
+    PRIMARY KEY (id, userId)
 );
+
 create table if not exists lastViewRecipes (
     userId varchar(50) not null,
     recipeId int not null,

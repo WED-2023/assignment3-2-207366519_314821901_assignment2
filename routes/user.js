@@ -61,7 +61,7 @@ router.get('/favorites', async (req,res,next) => {
   }
 });
 
-router.delete("/remove", async (req, res, next) => {
+router.delete("/favorites", async (req, res, next) => {
   try {
     const userId = req.session.user_id;
     const { recipeId } = req.body;
@@ -73,7 +73,7 @@ router.delete("/remove", async (req, res, next) => {
     await user_utils.removeFavoriteRecipe(userId, recipeId);
     res.status(200).send("Recipe removed from favorites");
   } catch (err) {
-    next(err);
+    res.status(500).send("Error removing recipe from favorites");
   }
 });
 
@@ -102,7 +102,7 @@ router.get("/history", async (req, res, next) => {
 
   router.post("/RecipeDB", async (req, res, next) => {
     try {
-      await user_utils.addRecipeToDB(req.body);
+      await user_utils.addRecipeToDB(req.body, req.session.user_id);
       res.status(201).send("Recipe successfully added to database");
     } catch (error) {
       next(error);
@@ -178,7 +178,7 @@ router.get("/getLastViewedRecipes", async (req, res, next) => {
     const userId = req.session.user_id;
     console.log("user id in getLastViewedRecipes:",userId);
     const lastViewed = await user_utils.getLastViewedRecipes(userId);
-    const results = await recipe_utils.getRecipesByArray(lastViewed, userId);
+    const results = await recipe_utils.getRecipesByArray(lastViewed,userId);
     res.send(results);
   } catch (error) {
     next(error);
