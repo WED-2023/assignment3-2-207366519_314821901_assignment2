@@ -1,8 +1,23 @@
 var express = require("express");
 var router = express.Router();
+const path = require("path");
+const multer = require("multer");
 const DButils = require("./utils/DButils");
 const user_utils = require("./utils/user_utils");
 const recipe_utils = require("./utils/recipes_utils");
+
+// -------- multer setup for image upload --------
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "uploads/"); 
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    const ext = path.extname(file.originalname);
+    cb(null, file.fieldname + "-" + uniqueSuffix + ext);
+  },
+});
+const upload = multer({ storage: storage });
 
 /**
  * Authenticate all incoming requests by middleware
@@ -220,4 +235,20 @@ router.post("/addToViewRecipe", async (req, res, next) => {
       next(error);
     }
   });
+  router.post(
+    "/upload-image",
+    upload.single("image"),
+    async (req, res, next) => {
+      try {
+        if (!req.file) {
+          return res.status(400).json({ error: "No file uploaded" });
+        }
+        // Return URL or relative path for uploaded image
+        const imageUrl = `/uploads/${req.file.filename}`;
+        res.status(201).json({ imageUrl });
+      } catch (error) {
+        next(error);
+      }
+    }
+  );
 module.exports = router;

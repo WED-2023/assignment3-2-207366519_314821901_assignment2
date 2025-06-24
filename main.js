@@ -83,6 +83,7 @@ app.use("/recipes", recipes);
 app.use("/", auth);
 
 
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 
 
