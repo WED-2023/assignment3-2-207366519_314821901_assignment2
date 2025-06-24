@@ -308,6 +308,24 @@ paths:
             description: Unauthorized
         security:
           - cookieAuth: []
+  /users/getUserRecipes:
+    get:
+      tags:
+        - user
+      summary: Get user's recipes
+      description: Retrieve the list of recipes for the logged-in user.
+      operationId: getUserRecipes
+      responses:
+        "200":
+          description: List of recipes retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Receipe'
+        "400":
+          description: Invalid user ID
+        "404":
+          description: User not found
   /recipes/like:
     get:
       tags:

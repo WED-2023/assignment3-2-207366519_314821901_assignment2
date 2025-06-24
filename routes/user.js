@@ -195,4 +195,29 @@ router.post("/addToViewRecipe", async (req, res, next) => {
     next(error);
   }
 });
+  router.get("/getUserRecipes", async (req, res, next) => {
+    try {
+      const userId = req.session.user_id;
+      const recipes = await user_utils.getUserRecipes(userId);
+      const recipesArray = recipes.map((recipe) => ({
+        recipeId: recipe.id,
+        internalRecipe: true,
+        title: recipe.title,
+        image: recipe.image,
+        readyInMinutes: recipe.readyInMinutes,
+        vegan: recipe.vegan,
+        vegetarian: recipe.vegetarian,
+        glutenFree: recipe.glutenFree,
+        popularity: recipe.popularity,
+        analyzedInstructions: recipe.analyzedInstructions,
+        summary: recipe.summary,
+        extendedIngredients: recipe.extendedIngredients,
+        servings: recipe.servings
+      }));
+      const results = await recipe_utils.getRecipesByArray(recipesArray,userId);
+      res.send(results);
+    } catch (error) {
+      next(error);
+    }
+  });
 module.exports = router;

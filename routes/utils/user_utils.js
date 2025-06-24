@@ -174,6 +174,14 @@ async function updateLastViewedRecipe(userId, recipeId, internalRecipe) {
         );
     `);
 }
+async function getUserRecipes(userId) {
+  const results = await DButils.execQuery(`
+    SELECT id, title, image, readyInMinutes, vegan, vegetarian, glutenFree, popularity, analyzedInstructions, summary, userId, extendedIngredients, servings
+    FROM receipes
+    WHERE userId = '${userId}'
+  `);
+  return results;
+}
 
 
 
@@ -191,3 +199,4 @@ exports.addRecipeToDB = addRecipeToDB;
 exports.getFamilyRecipes = getFamilyRecipes;
 exports.getLastViewedRecipes = getLastViewedRecipes;
 exports.updateLastViewedRecipe = updateLastViewedRecipe;
+exports.getUserRecipes = getUserRecipes;
