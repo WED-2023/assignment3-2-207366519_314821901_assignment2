@@ -9,7 +9,7 @@ const recipe_utils = require("./utils/recipes_utils");
 // -------- multer setup for image upload --------
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, "uploads/"); 
+    cb(null, path.join(__dirname, "../uploads")); 
   },
   filename: function (req, file, cb) {
     const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
@@ -235,20 +235,16 @@ router.post("/addToViewRecipe", async (req, res, next) => {
       next(error);
     }
   });
-  router.post(
-    "/upload-image",
-    upload.single("image"),
-    async (req, res, next) => {
-      try {
-        if (!req.file) {
-          return res.status(400).json({ error: "No file uploaded" });
-        }
-        // Return URL or relative path for uploaded image
-        const imageUrl = `/uploads/${req.file.filename}`;
-        res.status(201).json({ imageUrl });
-      } catch (error) {
-        next(error);
+  router.post("/upload-image", upload.single("image"), (req, res, next) => {
+    try {
+      if (!req.file) {
+        return res.status(400).send("No image file provided");
       }
+      // Send back the relative path for frontend use
+      const imageUrl = `/uploads/${req.file.filename}`;
+      res.status(201).json({ message: "Image uploaded successfully", imageUrl });
+    } catch (err) {
+      next(err);
     }
-  );
+  });
 module.exports = router;
