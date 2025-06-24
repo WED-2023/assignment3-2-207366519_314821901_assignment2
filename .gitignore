@@ -3,3 +3,4 @@
 privkey.pem
 server_connection.js
 fullchain.pem
+node_modules/
