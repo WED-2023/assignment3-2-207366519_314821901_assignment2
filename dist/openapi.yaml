@@ -445,6 +445,21 @@ paths:
           description: Recipe not found
         "500":
           description: External API error or server error
+  /recipes/familyrecipes:
+    get:
+      tags:
+        - receipe
+      summary: Get user's family recipes
+      description: Retrieve the list of family recipes for the logged-in user.
+      operationId: getFamilyRecipes
+      responses:
+        "200":
+          description: List of family recipes retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+
   /users/addToViewRecipe:
     post:
       tags:
@@ -619,20 +634,6 @@ paths:
                       example: true
         "401":
           description: Unauthorized
-  /users/familyrecipes:
-    get:
-      tags:
-        - user
-      summary: Get user's family recipes
-      description: Retrieve the list of family recipes for the logged-in user.
-      operationId: getFamilyRecipes
-      responses:
-        "200":
-          description: List of family recipes retrieved successfully
-          content:
-            application/json:
-              schema:
-                type: array
 
   
 

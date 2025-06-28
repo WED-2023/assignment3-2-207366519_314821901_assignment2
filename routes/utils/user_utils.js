@@ -80,27 +80,7 @@ async function addRecipeToDB(recipe,userId) {
       VALUES ('${title}', '${image}', ${readyInMinutes}, ${vegan}, ${vegetarian}, ${glutenFree}, 0, '${instructionsJson}', '${summary}', '${userId}', '${ingredientsJson}', ${servings})
   `);
 }
-async function getFamilyRecipes(user_id){
-  console.log("Fetching family recipes for user:", user_id);
-  const query = `
-    SELECT recipe_id, familyowner, whenmade
-    FROM family_recipes
-    WHERE user_id = '${user_id}'
-  `;
-  const family_recipes = await DButils.execQuery(query);
-  console.log("Family recipes found:", family_recipes);
-  try{
-      const recipePromises = family_recipes.map(recipe =>
-      getRecipeFromDB(recipe.recipe_id)
-    );
-    const recipes = await Promise.all(recipePromises); // <-- Await all promises here
-    return recipes;
-  }catch(error){
-    // it means that the recipe is not in the database
-    console.error("No family recipes found for this user", error);
-    return [];
-  }
-}
+
 
 
 
@@ -196,7 +176,6 @@ exports.markAsFavorite = markAsFavorite;
 exports.getFavoriteRecipes = getFavoriteRecipes;
 exports.getRecipeFromDB = getRecipeFromDB;
 exports.addRecipeToDB = addRecipeToDB;
-exports.getFamilyRecipes = getFamilyRecipes;
 exports.getLastViewedRecipes = getLastViewedRecipes;
 exports.updateLastViewedRecipe = updateLastViewedRecipe;
 exports.getUserRecipes = getUserRecipes;

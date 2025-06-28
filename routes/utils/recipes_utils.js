@@ -21,10 +21,11 @@ async function getRecipeInformation(recipe_id) {
 
 async function getRecipeDetails(recipe_id,userId) {
     let recipe_info = await getRecipeInformation(recipe_id);
-    let { id, title, readyInMinutes, image, aggregateLikes, vegan, vegetarian, glutenFree, extendedIngredients, analyzedInstructions, summary, sourceName } = recipe_info.data;
+    let { id, title, readyInMinutes, image, aggregateLikes, vegan, vegetarian, glutenFree, extendedIngredients, analyzedInstructions, summary, sourceName, servings } = recipe_info.data;
     const viewed = await isViewedRecipe(userId, recipe_id);
     const favorite = await isFavoriteRecipe(userId, recipe_id);
     const likes = await getRecipeLikes(recipe_id);
+    console.log("servings", servings);
     return {
         id: id,
         title: title,
@@ -38,6 +39,7 @@ async function getRecipeDetails(recipe_id,userId) {
         analyzedInstructions: analyzedInstructions,
         summary: summary,
         sourceName: sourceName,
+        servings: servings,
         isViewedRecipe: viewed,
         isFavoriteRecipe: favorite
     }
@@ -102,6 +104,7 @@ async function getRandomRecipes(userId) {
       analyzedInstructions: recipe.analyzedInstructions,
       summary: recipe.summary,
       sourceName: recipe.sourceName,
+      servings: recipe.servings,
       isViewedRecipe: await isViewedRecipe(userId, recipe.id),
       isFavoriteRecipe: await isFavoriteRecipe(userId, recipe.id)
     };
@@ -137,10 +140,31 @@ async function getRecipeLikes(recipeId) {
     return likes[0].likesCount;
 }
 
+async function getFamilyRecipes(){
+  const query = `
+    SELECT recipe_id
+    FROM family_recipes
+  `;
+  const family_recipes = await DButils.execQuery(query);
+  console.log("family_recipes", family_recipes);
+  try{
+      const recipePromises = family_recipes.map(recipe =>
+      user_utils.getRecipeFromDB(recipe.recipe_id)
+    );
+    const recipes = await Promise.all(recipePromises); // <-- Await all promises here
+    return recipes;
+  }catch(error){
+    // it means that the recipe is not in the database
+    console.error("No family recipes found for this user", error);
+    return [];
+  }
+}
+
 
 module.exports = {
   getRecipeLikes,
   getRecipesByArray,
+  getFamilyRecipes,
 //   updateLastViewedRecipe,
   getRecipeDetails,
   getRandomRecipes,

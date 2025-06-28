@@ -141,16 +141,7 @@ router.get("/history", async (req, res, next) => {
     }
   });
 
-  router.get('/familyrecipes', async (req, res) => {
-    try {
-      const user_id = req.session.user_id;
-      const family_recipes = await user_utils.getFamilyRecipes(user_id);
-      res.status(200).send(family_recipes);
-    } catch (error) {
-      console.error("Error fetching family recipes:", error);
-      res.status(500).send({ message: "Internal Server Error" });
-    }
-  });
+
 
 
 router.post("/like", async (req, res, next) => {

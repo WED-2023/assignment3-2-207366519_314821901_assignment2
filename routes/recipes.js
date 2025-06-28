@@ -52,4 +52,15 @@ router.get("/like", async (req, res, next) => {
 }
 )
 
+
+  router.get('/familyrecipes', async (req, res) => {
+    try {
+      const family_recipes = await recipes_utils.getFamilyRecipes();
+      res.status(200).send(family_recipes);
+    } catch (error) {
+      console.error("Error fetching family recipes:", error);
+      res.status(500).send({ message: "Internal Server Error" });
+    }
+  });
+
 module.exports = router;
